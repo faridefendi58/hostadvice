@@ -1,0 +1,1 @@
+var IntroReviews;jQuery(function($){$('#intro-reviews').find('.scroller').slick({infinite:true,slidesToShow:Device.isMobile()||Device.isMobileXS()?2:3,slidesToScroll:1,autoplay:true,accessibility:false,autoplaySpeed:3500,arrows:false,draggable:false,speed:400,rtl:Page.isRTL(),swipeToSlide:true});});

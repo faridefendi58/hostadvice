@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<div id="main_wrapper">
+	<div class="page_bar clearfix">
+		<div class="row">
+			<div class="col-sm-8">
+				<h1 class="page_title">Detail Layanan {{ model.title }}</h1>
+				<p class="text-muted">Detail dan ubah data layanan</p>
+			</div>
+			<div class="col-sm-4 text-right">
+				<a class="btn btn-default" href="{{ 'hosting/companies/view' | link }}">Daftar Layanan</a>
+			</div>
+		</div>
+	</div>
+	<div class="page_content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							Layanan {{ model.title }}
+						</div>
+						<div class="panel-body">
+							<ul class="nav nav-tabs" id="tabs_a">
+								<li class="active"><a data-toggle="tab" href="#detail">Detail Layanan</a></li>
+								<li><a data-toggle="tab" href="#ubah">Ubah Data</a></li>
+								<li><a data-toggle="tab" href="#paket-hosting">Paket Hosting</a></li>
+								<li><a data-toggle="tab" href="#fitur">Fitur Layanan</a></li>
+							</ul>
+							<div class="tab-content" id="tabs_content_a">
+								<div id="detail" class="tab-pane fade in active">
+									<table class="table table-responsive">
+										<tr>
+											<td width="30%">ID</td>
+											<td width="70%">#{{ model.id }}</td>
+										</tr>
+										<tr>
+											<td>Nama Layanan</td>
+											<td>{{ model.title }}</td>
+										</tr>
+										<tr>
+											<td>Deskripsi</td>
+											<td>{{ model.description | default('-') }}</td>
+										</tr>
+										<tr>
+											<td>Website</td>
+											<td>{{ model.website }}</td>
+										</tr>
+										<tr>
+											<td>Alamat</td>
+											<td>{{ model.address }}</td>
+										</tr>
+										<tr>
+											<td>Phone</td>
+											<td>{{ model.phone }}</td>
+										</tr>
+										<tr>
+											<td>Email</td>
+											<td>{{ model.email }}</td>
+										</tr>
+										<tr>
+											<td>Status</td>
+											<td>{{ model.status | title }}</td>
+										</tr>
+										<tr>
+											<td>Tanggal Input</td>
+											<td>{{ model.created_at }}</td>
+										</tr>
+										<tr>
+											<td>Diinput Oleh</td>
+											<td>{{ detail.created_by_name }}</td>
+										</tr>
+									</table>
+								</div>
+								<div id="ubah" class="tab-pane fade">
+									{% include 'hostings/_form.html' with {'model':model, 'message':message} %}
+								</div>
+								<div id="paket-hosting" class="tab-pane fade">
+									{% include 'hostings/_package.html' with {'model':model, 'plans':plans} %}
+								</div>
+								<div id="fitur" class="tab-pane fade">
+									{% include 'hostings/_feature.html' with {'model':model} %}
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+
+</script>
+{% endblock %}

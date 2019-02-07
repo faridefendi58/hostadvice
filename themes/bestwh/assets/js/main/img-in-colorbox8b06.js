@@ -1,0 +1,2 @@
+jQuery(function($){$(document).ready(function(){$('article a > img').each(function(){if(!$(this).hasClass('avatar')){return;}
+if(!$(this).parent().hasClass('post-thumb')){$(this).parent().colorbox({maxWidth:'90%',maxHeight:'90%'});}});});});

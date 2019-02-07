@@ -1,0 +1,3 @@
+jQuery(function($){var checkCountsInterval=null;function checkCounts(){var remove=false;$('.disqus-comment-count[data-disqus-url]:not(:empty)').each(function(){remove=true;var $this=$(this);var matches=$this.text().match(/(\d+) Comments?/);if(matches){var tr=matches[0];switch(matches[1]){case "0":tr=tr_key("disqus_no_comments",tr);break;case "1":tr=tr_key("disqus_one_comment",tr);break;default:tr=tr_key("disqus_multiple_comments",tr).replace("{num}",matches[1]);break;}
+var url=$this.data('disqus-url');$('a[href="'+url+'#comments"]').attr('href',url+'#disqus_thread').text(tr);$this.remove();}});if(remove){clearInterval(checkCountsInterval);}}
+checkCountsInterval=setInterval(checkCounts,777);});

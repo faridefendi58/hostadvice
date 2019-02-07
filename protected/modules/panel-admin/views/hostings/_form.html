@@ -1,0 +1,49 @@
+<p>Kolom bertanda <span class="red">*</span> tidak boleh dikosongi</p>
+{% if message %}
+<div class="alert {% if success %}alert-success{% else %}alert-warning{% endif %}">{{ message }}</div>
+{% endif %}
+<form method="post" id="page-create">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="control-label">Nama Layanan <span class="red">*</span></label>
+                <input name="HostingCompany[title]" type="text" class="form-control" value="{{ model.title }}">
+            </div>
+            <div class="form-group">
+                <label class="control-label">Phone <span class="red">*</span></label>
+                <input name="HostingCompany[phone]" type="text" class="form-control" value="{{ model.phone }}">
+            </div>
+            <div class="form-group">
+                <label class="control-label">Email <span class="red">*</span></label>
+                <input name="HostingCompany[email]" type="text" class="form-control" value="{{ model.email }}">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                {% set status_list = {'enabled':'Enabled', 'disabled':'Disabled', 'hidden':'Hidden'} %}
+                {% for status_code, status_name in status_list %}
+                <label class="radio-inline">
+                    <input type="radio" name="HostingCompany[status]" id="optionsRadios1" value="{{ status_code }}" {% if status_code == model.status %}checked="checked"{% endif %}>
+                    {{ status_name }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="control-label">Website <span class="red">*</span></label>
+                <input name="HostingCompany[website]" type="text" class="form-control" value="{{ model.website }}">
+            </div>
+            <div class="form-group">
+                <label class="control-label">Deskripsi</label>
+                <textarea name="HostingCompany[description]" class="form-control">{{ model.description }}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Alamat</label>
+                <textarea name="HostingCompany[address]" class="form-control">{{ model.address }}</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="form-group col-sm-12">
+        <input type="submit" name="Submit" value="Update" class="btn btn-success btn-submit">
+    </div>
+</form>
