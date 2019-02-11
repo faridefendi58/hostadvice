@@ -1,0 +1,87 @@
+<div class="row">
+    <div class="col-md-7">
+        <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+            <div class="alert alert-success" id="alert-update-feature" style="display: none;"></div>
+            <table class="table table-responsive dataTable">
+                <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Nilai</th>
+                    <th>Catatan</th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i, feature in features %}
+                <tr>
+                    <td>
+                        <input type="text" name="HostingFeature[title][{{ feature.id }}]" value="{{ feature.title }}" class="form-control f_title">
+                    </td>
+                    <td>
+                        <input type="text" name="HostingFeature[value][{{ feature.id }}]" value="{{ feature.value }}" class="form-control f_value">
+                    </td>
+                    <td>{{ feature.notes | default('-') }}</td>
+                    <td>
+                        <a href="#" onclick="return updateFeature(this);" rel-id="{{ feature.id }}">
+                            <i class="fa fa-refresh"></i>
+                        </a>
+                        <a href="{{ 'hosting/companies/delete-feature' | link }}/{{ feature.id }}" onclick="return hapusFitur(this);">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-5">
+        {% include 'hostings/_form_feature.html' with {'hosting_company_id':model.id} %}
+    </div>
+</div>
+<script type="text/javascript">
+    function hapusFitur(dt) {
+        if (confirm('Anda yakin ingin menghapus item ini ?')) {
+            var $this =  $(dt);
+            var url = $this.attr('href');
+            $.ajax({
+                'url': url,
+                'type':'post',
+                'success': function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        $this.parent().parent().remove();
+                    }
+                }
+            });
+        }
+        return false;
+    }
+    function updateFeature(dt) {
+        //if (confirm('Anda yakin ingin memperbarui data item ini ?')) {
+            var $this =  $(dt);
+            var url = "{{ 'hosting/companies/update-feature' | link }}/"+ $this.attr('rel-id');
+            var f_title = $this.parent().parent().find('.f_title').val();
+            var f_value = $this.parent().parent().find('.f_value').val();
+            $.ajax({
+                'url': url,
+                'type':'post',
+                'data':{'id':$this.attr('rel-id'),'title':f_title,'value':f_value},
+                'dataType':'json',
+                'success': function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        $('#alert-update-feature').html(data.message);
+                        $('#alert-update-feature').show();
+                        setTimeout(function () {
+                            $('#alert-update-feature').hide();
+                        }, 2000);
+                    } else {
+                        $('#alert-update-feature').hide();
+                    }
+                }
+            });
+        //}
+        return false;
+    }
+</script>

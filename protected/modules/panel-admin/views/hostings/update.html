@@ -4,6 +4,9 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ 'lib/DataTables/media/css/jquery.dataTables.min.css' | admin_asset_url }}">
+<link rel="stylesheet" href="{{ 'lib/select2/select2.css' | admin_asset_url }}">
+
 <div id="main_wrapper">
 	<div class="page_bar clearfix">
 		<div class="row">
@@ -30,6 +33,7 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 								<li><a data-toggle="tab" href="#ubah">Ubah Data</a></li>
 								<li><a data-toggle="tab" href="#paket-hosting">Paket Hosting</a></li>
 								<li><a data-toggle="tab" href="#fitur">Fitur Layanan</a></li>
+								<li><a data-toggle="tab" href="#review">Review</a></li>
 							</ul>
 							<div class="tab-content" id="tabs_content_a">
 								<div id="detail" class="tab-pane fade in active">
@@ -85,6 +89,9 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 								<div id="fitur" class="tab-pane fade">
 									{% include 'hostings/_feature.html' with {'model':model} %}
 								</div>
+								<div id="review" class="tab-pane fade">
+									{% include 'hostings/_review.html' with {'model':model, 'reviews':reviews} %}
+								</div>
 							</div>
 
 						</div>
@@ -98,7 +105,16 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 {% endblock %}
 {% block endbodyjs %}
 <script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
+<script src="{{ 'lib/DataTables/media/js/jquery.dataTables.min.js' | admin_asset_url }}"></script>
+<script src="{{ 'lib/select2/select2.min.js' | admin_asset_url }}"></script>
 <script type="text/javascript">
-
+$(function () {
+    if($('#s2_basic').length) {
+        $('#s2_basic').select2({
+            allowClear: true,
+            placeholder: "Select..."
+        });
+    }
+});
 </script>
 {% endblock %}

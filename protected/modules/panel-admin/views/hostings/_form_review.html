@@ -1,0 +1,71 @@
+<form method="post" id="review-form" action="{{ 'hosting/companies/create-review' | link }}/{{ hosting_company_id }}">
+    <div class="alert alert-success" style="display: none;"></div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label class="control-label">Pilih Reviewer</label>
+            {% set revrs = App.call.model("\\ExtensionsModel\\HostingReviewerModel", 'getData', {}) %}
+            <select id="s2_basic" name="HostingReview[reviewer_id]" class="form-control" onchange="chooseReviewer(this);">
+                <option value="-">Pilih</option>
+                {% for fi,revr in revrs %}
+                <option value="{{ revr.id }}" attr-title="{{ revr.name }}">{{ revr.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label">Nama Reviewer</label>
+            <input name="HostingReview[reviewer_name]" type="text" class="form-control feature-title" value="{{ pmodel.reviewer_name }}">
+        </div>
+        <div class="clearfix mb10"></div>
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-6">
+                <label class="control-label">Email Reviewer</label>
+                <input name="HostingReview[reviewer_email]" type="text" class="form-control feature-title" value="{{ pmodel.reviewer_email }}">
+            </div>
+        </div>
+        <div class="clearfix mb15"></div>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Isi Review <span class="red">*</span></label>
+        <textarea name="HostingReview[content]" class="form-control" required>{{ pmodel.content }}</textarea>
+    </div>
+    <input type="hidden" name="HostingReview[hosting_company_id]" value="{{ hosting_company_id }}">
+    <input type="hidden" name="HostingReview[reviewer_id]" value="" id="hosting_reviewer_id">
+    <div class="form-group">
+        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveFeature(this);">
+    </div>
+</form>
+<script type="text/javascript">
+    function saveFeature(dt) {
+        var url = $(dt).parent().parent().attr('action');
+        console.log(url);
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data': $('#review-form').serialize(),
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    var alert_success = $('#review-form').find('.alert-success');
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    setTimeout(function () {
+                        window.location.reload(true);
+                    }, 5000);
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            }
+        });
+
+        return false;
+    }
+
+    function chooseReviewer(dt) {
+        var opt = $(dt).find('option[value="'+ $(dt).val() +'"]');
+        $('#hosting_reviewer_id').val($(dt).val());
+        return false;
+    }
+</script>

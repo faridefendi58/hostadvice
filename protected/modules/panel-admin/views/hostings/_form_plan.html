@@ -5,7 +5,28 @@
         <input name="HostingPlan[title]" type="text" class="form-control" value="{{ pmodel.title }}">
     </div>
     <div class="form-group">
-        <label class="control-label">Deskripsi</label>
+        <label class="control-label">Deskripsi Singkat</label>
+        <textarea name="HostingPlan[short_description]" class="form-control">{{ pmodel.short_description }}</textarea>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Harga<span class="red">*</span></label>
+        {% set terms = {'price_1m':'1 Bulan', 'price_3m':'3 Bulan',
+            'price_6m':'6 Bulan', 'price_1y':'1 Tahun', 'price_2y':'2 Tahun', 'price_3y':'3 Tahun'} %}
+        <div class="row">
+            {% set no = 1 %}
+            {% for term, term_name in terms %}
+            <div class="col-md-6">
+                <input name="HostingPlan[term][{{ term }}]" type="text" class="form-control" placeholder="{{ term_name }}">
+            </div>
+            {% if no is divisible by(2) %}
+                </div><div class="row">
+            {% endif %}
+                {% set no = no + 1 %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Catatan</label>
         <textarea name="HostingPlan[description]" class="form-control">{{ pmodel.description }}</textarea>
     </div>
     <input type="hidden" name="HostingPlan[hosting_company_id]" value="{{ hosting_company_id }}">

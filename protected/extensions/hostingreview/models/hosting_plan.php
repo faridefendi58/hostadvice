@@ -57,7 +57,11 @@ class HostingPlanModel extends \Model\BaseModel
             }
         }
 
-        $sql .= ' ORDER BY t.created_at DESC';
+        if (isset($data['order_by']) && isset($data['order_type'])) {
+            $sql .= ' ORDER BY t.'. $data['order_by'].' '. $data['order_type'];
+        } else {
+            $sql .= ' ORDER BY t.created_at DESC';
+        }
 
         if (isset($data['limit'])) {
             $sql .= ' LIMIT '. $data['limit'];

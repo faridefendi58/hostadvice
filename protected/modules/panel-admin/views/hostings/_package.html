@@ -1,32 +1,39 @@
 <div class="row">
     <div class="col-md-6">
-        <table class="table table-responsive">
-            <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Paket</th>
-                <th>Harga (per tahun)</th>
-                <th>&nbsp;</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for i, plan in plans %}
+        <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+            <div class="alert alert-success" id="alert-update-plan" style="display: none;"></div>
+            <table class="table table-responsive dataTable">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Paket</th>
+                    <th>Harga (Per Tahun)</th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i, plan in plans %}
                 <tr>
                     <td>{{ i + 1 }}</td>
-                    <td>{{ plan.title }}</td>
-                    <td>{{ plan.price_1y | default('0') | number_format(0, ',', '.') }}</td>
                     <td>
-                        <a href="{{ 'hosting/companies/update-plan' | link }}/{{ plan.id }}">
-                            <i class="fa fa-pencil"></i>
+                        <input type="text" name="HostingPlan[title][{{ plan.id }}]" value="{{ plan.title }}" class="form-control p_title">
+                    </td>
+                    <td>
+                        <input type="text" name="HostingPlan[price][{{ plan.id }}]" value="{{ plan.price_1y }}" class="form-control p_value">
+                    </td>
+                    <td>
+                        <a href="#" onclick="return updatePlan(this);" rel-id="{{ plan.id }}">
+                            <i class="fa fa-refresh"></i>
                         </a>
                         <a href="{{ 'hosting/companies/delete-plan' | link }}/{{ plan.id }}" onclick="return hapusPlan(this);">
                             <i class="fa fa-trash-o"></i>
                         </a>
                     </td>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="col-md-6">
         {% include 'hostings/_form_plan.html' with {'hosting_company_id':model.id} %}
@@ -48,6 +55,32 @@
                 }
             });
         }
+        return false;
+    }
+    function updatePlan(dt) {
+        var $this =  $(dt);
+        var url = "{{ 'hosting/companies/update-plan' | link }}/"+ $this.attr('rel-id');
+        var p_title = $this.parent().parent().find('.p_title').val();
+        var p_value = $this.parent().parent().find('.p_value').val();
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data':{'id':$this.attr('rel-id'),'title':p_title,'price_1y':p_value},
+            'dataType':'json',
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    $('#alert-update-plan').html(data.message);
+                    $('#alert-update-plan').show();
+                    setTimeout(function () {
+                        $('#alert-update-plan').hide();
+                    }, 2000);
+                } else {
+                    $('#alert-update-plan').hide();
+                }
+            }
+        });
+
         return false;
     }
 </script>
