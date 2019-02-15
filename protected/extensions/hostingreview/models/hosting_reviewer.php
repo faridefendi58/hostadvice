@@ -5,6 +5,10 @@ require_once __DIR__ . '/../../../models/base.php';
 
 class HostingReviewerModel extends \Model\BaseModel
 {
+    const STATUS_ACTIVE = 'active';
+    const STATUS_INACTIVE = 'inactive';
+    const STATUS_DELETED = 'deleted';
+
     public static function model($className=__CLASS__)
     {
         return parent::model($className);

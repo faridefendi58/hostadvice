@@ -28,6 +28,9 @@ $app->group('/hosting', function () use ($user) {
     $this->group('/companies', function() use ($user) {
         new Extensions\Controllers\CompaniesController($this, $user);
     });
+    $this->group('/reviewers', function() use ($user) {
+        new Extensions\Controllers\ReviewersController($this, $user);
+    });
 });
 
 ?>

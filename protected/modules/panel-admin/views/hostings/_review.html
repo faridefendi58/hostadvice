@@ -15,7 +15,7 @@
                 {% for i, review in reviews %}
                 <tr>
                     <td>
-                        {{ review.reviewer_name }}
+                        <a href="{{ 'hosting/reviewers/update' | link }}/{{ review.reviewer_id }}" target="_blank">{{ review.reviewer_name }}</a>
                     </td>
                     <td>
                         <textarea

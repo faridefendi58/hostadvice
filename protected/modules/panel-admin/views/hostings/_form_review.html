@@ -30,7 +30,7 @@
                 {% set rates = [1,2,3,4,5,6,7,8,9,10] %}
                 <select name="HostingReview[rate]" class="form-control">
                     {% for i,rate in rates %}
-                    <option value="rate">{{ rate }}</option>
+                    <option value="{{ rate }}">{{ rate }}</option>
                     {% endfor %}
                 </select>
             </div>

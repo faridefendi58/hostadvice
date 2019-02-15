@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Detail Reviewer - {{ model.name }} - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ 'lib/DataTables/media/css/jquery.dataTables.min.css' | admin_asset_url }}">
+<link rel="stylesheet" href="{{ 'lib/select2/select2.css' | admin_asset_url }}">
+<link rel="stylesheet" href="{{ 'css/bootstrap-fileupload.min.css' | admin_asset_url }}" />
+
+<div id="main_wrapper">
+    <div class="page_bar clearfix">
+        <div class="row">
+            <div class="col-sm-8">
+                <h1 class="page_title">Detail Reviewer {{ model.name }}</h1>
+                <p class="text-muted">Detail dan ubah data reviewer</p>
+            </div>
+            <div class="col-sm-4 text-right">
+                <a class="btn btn-default" href="{{ 'hosting/reviewers/view' | link }}">Daftar Reviewer</a>
+            </div>
+        </div>
+    </div>
+    <div class="page_content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Reviewer {{ model.name }}
+                        </div>
+                        <div class="panel-body">
+                            <ul class="nav nav-tabs" id="tabs_a">
+                                <li class="active"><a data-toggle="tab" href="#detail">Detail</a></li>
+                                <li><a data-toggle="tab" href="#ubah">Ubah Data</a></li>
+                                <li><a data-toggle="tab" href="#review">Review</a></li>
+                            </ul>
+                            <div class="tab-content" id="tabs_content_a">
+                                <div id="detail" class="tab-pane fade in active">
+                                    <table class="table table-responsive">
+                                        <tr>
+                                            <td width="30%">ID</td>
+                                            <td width="70%">#{{ model.id }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nama</td>
+                                            <td>{{ model.name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Email</td>
+                                            <td>{{ model.email | default('-') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Phone</td>
+                                            <td>{{ model.phone | default('-') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Website</td>
+                                            <td>{{ model.website | default('-') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Status</td>
+                                            <td>{{ model.status | default('-') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Photo</td>
+                                            <td>
+                                                {% if model.image %}
+                                                <img src="{{ model.image | link }}" width="200px"/>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tanggal Input</td>
+                                            <td>{{ model.created_at }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div id="ubah" class="tab-pane fade">
+                                    {% include 'hostings/reviewer_form.html' with {'model':model, 'message':message} %}
+                                </div>
+                                <div id="review" class="tab-pane fade">
+                                    {# include 'hostings/_review.html' with {'model':model, 'reviews':reviews} #}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
+<script src="{{ 'lib/DataTables/media/js/jquery.dataTables.min.js' | admin_asset_url }}"></script>
+<script src="{{ 'lib/select2/select2.min.js' | admin_asset_url }}"></script>
+<script src="{{ 'js/bootstrap-fileupload.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+    $(function () {
+        if($('#s2_basic').length) {
+            $('#s2_basic').select2({
+                allowClear: true,
+                placeholder: "Select..."
+            });
+        }
+    });
+</script>
+{% endblock %}
