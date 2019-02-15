@@ -6,7 +6,7 @@
         <div class="col-md-6">
             <label class="control-label">Pilih Reviewer</label>
             {% set revrs = App.call.model("\\ExtensionsModel\\HostingReviewerModel", 'getData', {}) %}
-            <select id="s2_basic" name="HostingReview[reviewer_id]" class="form-control" onchange="chooseReviewer(this);">
+            <select id="s2_basic" name="HostingReview[reviewer_id]" class="form-control reviewer-list" onchange="chooseReviewer(this);">
                 <option value="-">Pilih</option>
                 {% for fi,revr in revrs %}
                 <option value="{{ revr.id }}" attr-title="{{ revr.name }}" attr-email="{{ revr.email }}">{{ revr.name }}</option>
@@ -99,7 +99,7 @@
         } else {
             var rev_id = $('#hosting_reviewer_id').val();
             if (rev_id == "-" || rev_id.length == 0) {
-                $('#s2_basic').parent().addClass('has-error');
+                $('.reviewer-list').parent().addClass('has-error');
                 errors.push('Mohon pilih salah satu reviewer atau isi kolom Nama Reviewer untuk membuat data baru.');
             }
         }
@@ -193,7 +193,7 @@
 
 
     function checkAccount(dt) {
-        if ($('select[id="s2_basic"]').val() == '-' || $('#hosting_reviewer_id').val().length == 0) {
+        if ($('select.reviewer-list').val() == '-' || $('#hosting_reviewer_id').val().length == 0) {
             isEmailExist($(dt).val());
         }
 

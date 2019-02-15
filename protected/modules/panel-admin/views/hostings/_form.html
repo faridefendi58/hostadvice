@@ -7,15 +7,15 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label class="control-label">Nama Layanan <span class="red">*</span></label>
-                <input name="HostingCompany[title]" type="text" class="form-control" value="{{ model.title }}">
+                <input name="HostingCompany[title]" type="text" class="form-control required" value="{{ model.title }}" required>
             </div>
             <div class="form-group">
                 <label class="control-label">Phone <span class="red">*</span></label>
-                <input name="HostingCompany[phone]" type="text" class="form-control" value="{{ model.phone }}">
+                <input name="HostingCompany[phone]" type="text" class="form-control required" value="{{ model.phone }}" required>
             </div>
             <div class="form-group">
                 <label class="control-label">Email <span class="red">*</span></label>
-                <input name="HostingCompany[email]" type="text" class="form-control" value="{{ model.email }}">
+                <input name="HostingCompany[email]" type="text" class="form-control required" value="{{ model.email }}" required>
             </div>
             <div class="form-group">
                 <label class="control-label">Deskripsi</label>
@@ -35,12 +35,12 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label class="control-label">Website <span class="red">*</span></label>
-                <input name="HostingCompany[website]" type="text" class="form-control" value="{{ model.website }}">
+                <input name="HostingCompany[website]" type="text" class="form-control required" value="{{ model.website }}" required>
             </div>
             {% set configs = model.configs | json_decode %}
             <div class="form-group">
                 <label class="control-label">Affiliate Url <span class="red">*</span></label>
-                <input name="HostingCompany[affiliate_url]" type="text" class="form-control" value="{{ configs.affiliate_url }}">
+                <input name="HostingCompany[affiliate_url]" type="text" class="form-control required" value="{{ configs.affiliate_url }}" required>
             </div>
             <div class="form-group">
                 <label class="control-label">Alamat</label>

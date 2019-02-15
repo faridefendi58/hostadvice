@@ -4,7 +4,7 @@
         <div class="col-md-6">
             <label class="control-label">Pilih Fitur</label>
             {% set ftrs = App.call.model("\\ExtensionsModel\\HostingFeatureModel", 'getData', {}) %}
-            <select id="s2_basic" name="HostingFeature[ftitle]" class="form-control" onchange="chooseFeature(this);">
+            <select id="s2_basic" name="HostingFeature[ftitle]" class="form-control feature-list" onchange="chooseFeature(this);">
                 <option value="-">Pilih</option>
                 {% for fi,ftr in ftrs %}
                 <option value="{{ ftr.id }}" attr-title="{{ ftr.title }}">{{ ftr.title }}</option>
@@ -19,7 +19,8 @@
     </div>
     <div class="form-group">
         <label class="control-label">Nilai <span class="red">*</span></label>
-        <input name="HostingFeature[value]" type="text" class="form-control" value="{{ pmodel.value }}">
+        <input name="HostingFeature[value]" type="text" class="form-control required"
+               value="{{ pmodel.value }}" id="feature-value">
     </div>
     <div class="form-group">
         <label class="control-label">Catatan</label>
@@ -32,8 +33,19 @@
         <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveFeature(this);">
     </div>
 </form>
+
+{% block endbodyjs %}
 <script type="text/javascript">
     function saveFeature(dt) {
+        var validate = jb_validation.validate($('form[id="feature-form"]'));
+        if (!validate) {
+            return false;
+        }
+        var validate2 = validateForm();
+        if (validate2 == false) {
+            return false;
+        }
+
         var url = $(dt).parent().parent().attr('action');
         console.log(url);
         $.ajax({
@@ -65,4 +77,28 @@
         $('#hosting_feature_title').val(opt.text());
         return false;
     }
+    
+    function validateForm() {
+        $('form[id="feature-form"]').find('.has-error').each(function () {
+            $(this).removeClass('has-error');
+            $(this).find('span.help-block').remove();
+        });
+
+        var has_error = 0;
+        var feature_title = $('.feature-title').val();
+        if (feature_title.length <= 0) {
+            var feature_list = $('.feature-list option').filter(':selected').val();
+            if (feature_list.length == 0 || feature_list == '-') {
+                var msg = "<span class=\"help-block\">Mohon pilih fitur atau buat nama fitur baru.</span>";
+                $('.feature-list').parent().addClass('has-error').append(msg);
+                has_error = has_error + 1;
+            } else {
+                $('.feature-list').parent().removeClass('has-error');
+                $('.feature-list').parent().find('span.help-block').remove();
+            }
+        }
+
+        return (has_error == 0)? true : false;
+    }
 </script>
+{% endblock %}

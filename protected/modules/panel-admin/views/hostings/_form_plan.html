@@ -2,11 +2,11 @@
     <div class="alert alert-success" style="display: none;"></div>
     <div class="form-group">
         <label class="control-label">Nama Paket <span class="red">*</span></label>
-        <input name="HostingPlan[title]" type="text" class="form-control" value="{{ pmodel.title }}">
+        <input name="HostingPlan[title]" type="text" class="form-control required" value="{{ pmodel.title }}">
     </div>
     <div class="form-group">
-        <label class="control-label">Deskripsi Singkat</label>
-        <textarea name="HostingPlan[short_description]" class="form-control">{{ pmodel.short_description }}</textarea>
+        <label class="control-label">Deskripsi Singkat <span class="red">*</span></label>
+        <textarea name="HostingPlan[short_description]" class="form-control required">{{ pmodel.short_description }}</textarea>
     </div>
     <div class="form-group">
         <label class="control-label">Harga<span class="red">*</span></label>
@@ -16,7 +16,11 @@
             {% set no = 1 %}
             {% for term, term_name in terms %}
             <div class="col-md-6">
-                <input name="HostingPlan[term][{{ term }}]" type="text" class="form-control" placeholder="{{ term_name }}">
+                {% set required_class = "" %}
+                {% if term == 'price_1y' %}
+                    {% set required_class = 'required' %}
+                {% endif %}
+                <input name="HostingPlan[term][{{ term }}]" type="text" class="form-control {{ required_class }}" placeholder="{{ term_name }}">
             </div>
             {% if no is divisible by(2) %}
                 </div><div class="row">
@@ -36,6 +40,11 @@
 </form>
 <script type="text/javascript">
     function savePlan(dt) {
+        var validate = jb_validation.validate($('form[id="plan-form"]'));
+        if (!validate) {
+            return false;
+        }
+
         var url = $(dt).parent().parent().attr('action');
         console.log(url);
         $.ajax({
