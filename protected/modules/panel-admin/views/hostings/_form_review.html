@@ -1,5 +1,7 @@
-<form method="post" id="review-form" action="{{ 'hosting/companies/create-review' | link }}/{{ hosting_company_id }}">
+<form method="post" id="review-form"
+      action="{{ 'hosting/companies/create-review' | link }}/{{ hosting_company_id }}" enctype="multipart/form-data">
     <div class="alert alert-success" style="display: none;"></div>
+    <div class="alert alert-warning" style="display: none;"></div>
     <div class="form-group row">
         <div class="col-md-6">
             <label class="control-label">Pilih Reviewer</label>
@@ -7,13 +9,13 @@
             <select id="s2_basic" name="HostingReview[reviewer_id]" class="form-control" onchange="chooseReviewer(this);">
                 <option value="-">Pilih</option>
                 {% for fi,revr in revrs %}
-                <option value="{{ revr.id }}" attr-title="{{ revr.name }}">{{ revr.name }}</option>
+                <option value="{{ revr.id }}" attr-title="{{ revr.name }}" attr-email="{{ revr.email }}">{{ revr.name }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="col-md-6">
             <label class="control-label">Nama Reviewer</label>
-            <input name="HostingReview[reviewer_name]" type="text" class="form-control feature-title" value="{{ pmodel.reviewer_name }}">
+            <input name="HostingReview[reviewer_name]" type="text" class="form-control reviewer-name" value="{{ pmodel.reviewer_name }}">
         </div>
         <div class="clearfix mb10"></div>
     </div>
@@ -21,35 +23,119 @@
         <div class="row">
             <div class="col-md-6">
                 <label class="control-label">Email Reviewer</label>
-                <input name="HostingReview[reviewer_email]" type="text" class="form-control feature-title" value="{{ pmodel.reviewer_email }}">
+                <input name="HostingReview[reviewer_email]" type="text" class="form-control reviewer-email" value="{{ pmodel.reviewer_email }}" onchange="checkAccount(this);">
+            </div>
+            <div class="col-md-6">
+                <label class="control-label">Rate</label>
+                {% set rates = [1,2,3,4,5,6,7,8,9,10] %}
+                <select name="HostingReview[rate]" class="form-control">
+                    {% for i,rate in rates %}
+                    <option value="rate">{{ rate }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="clearfix mb15"></div>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Image</label>
+        <div class="fileupload fileupload-new" data-provides="fileupload">
+            <div class="input-append">
+                <div class="uneditable-input">
+                    <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                    <span class="fileupload-preview"></span>
+                </div>
+                <span class="btn btn-default btn-file">
+                            <span class="fileupload-new">Select file</span>
+                            <span class="fileupload-exists">Change</span>
+                            <input type="file" name="HostingReview[reviewer_image]" class="reviewer-image"/>
+                        </span>
+                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
             </div>
         </div>
         <div class="clearfix mb15"></div>
     </div>
     <div class="form-group">
         <label class="control-label">Isi Review <span class="red">*</span></label>
-        <textarea name="HostingReview[content]" class="form-control" required>{{ pmodel.content }}</textarea>
+        <textarea name="HostingReview[content]" class="form-control review-content" required>{{ pmodel.content }}</textarea>
     </div>
     <input type="hidden" name="HostingReview[hosting_company_id]" value="{{ hosting_company_id }}">
     <input type="hidden" name="HostingReview[reviewer_id]" value="" id="hosting_reviewer_id">
     <div class="form-group">
-        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveFeature(this);">
+        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveReview(this);">
     </div>
 </form>
+
+{% block endbodyjs %}
 <script type="text/javascript">
-    function saveFeature(dt) {
+    function saveReview(dt) {
+        $('form[id="review-form"]').find('.has-error').each(function () {
+           $(this).removeClass('has-error');
+        });
+        var formData = new FormData($('form[id="review-form"]')[0]);
         var url = $(dt).parent().parent().attr('action');
-        console.log(url);
+        var reviewer_name = $('.reviewer-name').val();
+        var errors = new Array();
+        if (reviewer_name.length > 0) {
+            // check the other required form
+            var reviewer_email = $('.reviewer-email').val();
+            if (reviewer_email.length <= 0) {
+                errors.push('Kolom email harus diisi untuk membuat reviewer baru.');
+            } else {
+                if (!validateEmail(reviewer_email)) {
+                    errors.push('Format email tidak valid.');
+                } else {
+                    var has_data = isEmailExist(reviewer_email);
+                    if (has_data) {
+                        errors.push(reviewer_email+' sudah pernah terdaftar.');
+                    }
+                }
+            }
+            var reviewer_image = $('.reviewer-image').val();
+            if (reviewer_image.length <= 0) {
+                errors.push('Kolom image wajib diisi.');
+            }
+            $('#hosting_reviewer_id').val("");
+        } else {
+            var rev_id = $('#hosting_reviewer_id').val();
+            if (rev_id == "-" || rev_id.length == 0) {
+                $('#s2_basic').parent().addClass('has-error');
+                errors.push('Mohon pilih salah satu reviewer atau isi kolom Nama Reviewer untuk membuat data baru.');
+            }
+        }
+
+        var review_content = $('.review-content').val();
+        if (review_content.length <= 0) {
+            errors.push('Content review wajib diisi.');
+            $('.review-content').parent().addClass('has-error');
+        }
+
+        console.log(errors);
+        if (errors.length > 0) {
+            var msg = "";
+            for (i = 0; i < errors.length; i++) {
+                if (typeof (errors[i]) != undefined) {
+                    msg += errors[i] + "<br>";
+                }
+            }
+            $('.alert-warning').html(msg).show();
+            return false;
+        }
+
         $.ajax({
             'url': url,
             'type':'post',
-            'data': $('#review-form').serialize(),
+            'data': formData,
+            'dataType': 'json',
+            'async': false,
             'success': function(data) {
                 console.log(data);
                 if (data.status == 'success') {
                     var alert_success = $('#review-form').find('.alert-success');
+                    var alert_warning = $('#review-form').find('.alert-warning');
                     alert_success.html(data.message);
                     alert_success.show();
+                    alert_warning.hide();
                     setTimeout(function () {
                         window.location.reload(true);
                     }, 5000);
@@ -57,7 +143,10 @@
             },
             'errors': function (request, status, error) {
                 console.log(request.responseText);
-            }
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
         });
 
         return false;
@@ -66,6 +155,49 @@
     function chooseReviewer(dt) {
         var opt = $(dt).find('option[value="'+ $(dt).val() +'"]');
         $('#hosting_reviewer_id').val($(dt).val());
+        $('.reviewer-name').attr('placeholder', opt.text());
+        $('.reviewer-email').attr('placeholder', opt.attr('attr-email'));
+        $('#hosting_reviewer_id').val($(dt).val());
+        return true;
+    }
+
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    function isEmailExist(email) {
+        $.ajax({
+            'url': "{{ 'hosting/companies/check-reviewer' | link }}",
+            'type':'post',
+            'data': {'email':email},
+            'dataType': 'json',
+            'async': false,
+            'success': function(data) {
+                var msg = "<span class=\"help-block\">"+ data.message +"</span>";
+                if (data.status == 'success') {
+                    $('.reviewer-email').parent().addClass('has-error').append(msg);
+                    return true;
+                } else {
+                    $('.reviewer-email').parent().removeClass('has-error');
+                    $('.reviewer-email').parent().find('.help-block').remove();
+                    return false;
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+        });
+        return false;
+    }
+
+
+    function checkAccount(dt) {
+        if ($('select[id="s2_basic"]').val() == '-' || $('#hosting_reviewer_id').val().length == 0) {
+            isEmailExist($(dt).val());
+        }
+
         return false;
     }
 </script>
+{% endblock %}

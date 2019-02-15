@@ -81,4 +81,28 @@ class HostingReviewModel extends \Model\BaseModel
             self::STATUS_HIDDEN => 'Hidden'
         ];
     }
+
+    public function getLastData($data = null)
+    {
+        $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email  
+            FROM {tablePrefix}ext_hosting_review t 
+            LEFT JOIN {tablePrefix}ext_hosting_reviewer r ON r.id = t.reviewer_id 
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (!empty($data['hosting_company_id'])) {
+                $sql .= ' AND t.hosting_company_id=:hosting_company_id';
+                $params['hosting_company_id'] = $data['hosting_company_id'];
+            }
+        }
+
+        $sql .= ' ORDER BY t.created_at DESC LIMIT 1';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $row = \Model\R::getRow( $sql, $params );
+
+        return $row;
+    }
 }

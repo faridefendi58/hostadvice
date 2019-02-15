@@ -38,7 +38,10 @@ class HostingReviewerModel extends \Model\BaseModel
 
         $params = [];
         if (is_array($data)) {
-
+            if (isset($data['email'])) {
+                $sql .= " AND t.email =:email";
+                $params['email'] = $data['email'];
+            }
         }
 
         $sql .= ' ORDER BY t.created_at DESC';

@@ -3,6 +3,7 @@
 namespace Extensions\Controllers;
 
 use Components\BaseController as BaseController;
+use PHPMailer\PHPMailer\Exception;
 
 class CompaniesController extends BaseController
 {
@@ -26,6 +27,7 @@ class CompaniesController extends BaseController
         $app->map(['POST'], '/create-review/[{id}]', [$this, 'create_review']);
         $app->map(['POST'], '/update-review/[{id}]', [$this, 'update_review']);
         $app->map(['POST'], '/delete-review/[{id}]', [$this, 'delete_review']);
+        $app->map(['POST'], '/check-reviewer', [$this, 'check_reviewer']);
     }
 
     public function accessRules()
@@ -471,6 +473,9 @@ class CompaniesController extends BaseController
             if (!empty($_POST['HostingReview']['reviewer_id'])) {
                 $model->reviewer_id = $_POST['HostingFeature']['reviewer_id'];
             }
+            if (!empty($_POST['HostingReview']['rate'])) {
+                $model->rate = $_POST['HostingReview']['rate'];
+            }
             $model->hosting_company_id = $args['id'];
             $model->content = $_POST['HostingReview']['content'];
             $model->status = \ExtensionsModel\HostingReviewModel::STATUS_PUBLISHED;
@@ -492,9 +497,27 @@ class CompaniesController extends BaseController
                         $model3->updated_at = date("Y-m-d H:i:s");
                         $update = \ExtensionsModel\HostingReviewModel::model()->update($model3);
                     } else {
+                        // save image if any
+                        $uploadfile = null;
+                        if (isset($_FILES['HostingReview'])) {
+                            $path_info = pathinfo($_FILES['HostingReview']['name']['reviewer_image']);
+                            if (in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                                //echo json_encode(['status'=>'failed','message'=>'Allowed file type are jpg, png']); exit;
+                                $upload_folder = 'uploads/images/reviews';
+                                $file_name = time().'.'.$path_info['extension'];
+                                $uploadfile = $upload_folder . '/' . $file_name;
+                                try {
+                                    $upload = move_uploaded_file($_FILES['HostingReview']['tmp_name']['reviewer_image'], $uploadfile);
+                                } catch (\Exception $e) {}
+                            }
+                        }
+
                         $model2 = new \ExtensionsModel\HostingReviewerModel();
                         $model2->name = $_POST['HostingReview']['reviewer_name'];
                         $model2->email = $_POST['HostingReview']['reviewer_email'];
+                        if (!empty($uploadfile)) {
+                            $model2->image = $uploadfile;
+                        }
                         $model2->created_at = date("Y-m-d H:i:s");
                         $model2->updated_at = date("Y-m-d H:i:s");
                         try {
@@ -510,6 +533,7 @@ class CompaniesController extends BaseController
                         }
                     }
                 }
+
                 return $response->withJson(
                     [
                         'status' => 'success',
@@ -587,6 +611,37 @@ class CompaniesController extends BaseController
                 [
                     'status' => 'failed',
                     'message' => 'Data gagal dihapus.',
+                ], 201);
+        }
+    }
+
+    public function check_reviewer($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response, $args);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if(!$isAllowed){
+            return $this->notAllowedAction();
+        }
+
+        $params = $request->getParams();
+        if (!isset($params['email'])) {
+            return false;
+        }
+
+        $model = \ExtensionsModel\HostingReviewerModel::model()->findByAttributes(['email' => $params['email']]);
+        if ($model instanceof \RedBeanPHP\OODBBean) {
+            return $response->withJson(
+                [
+                    'status' => 'success',
+                    'message' => $params['email'].' sudah ada di database.',
+                ], 201);
+        } else {
+            return $response->withJson(
+                [
+                    'status' => 'failed',
+                    'message' => 'Data tidak ditemukan.',
                 ], 201);
         }
     }
