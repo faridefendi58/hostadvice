@@ -36,17 +36,28 @@ class HostingReviewModel extends \Model\BaseModel
      */
     public function getData($data = null)
     {
-        $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email  
+        $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email, r.image  
             FROM {tablePrefix}ext_hosting_review t 
             LEFT JOIN {tablePrefix}ext_hosting_reviewer r ON r.id = t.reviewer_id 
             WHERE 1';
 
-        $params = [];
+        $sql .= ' AND t.status=:status';
+        $params = [ 'status' => self::STATUS_PUBLISHED ];
         if (is_array($data)) {
-
+            if (!empty($data['hosting_company_id'])) {
+                $sql .= ' AND t.hosting_company_id=:hosting_company_id';
+                $params['hosting_company_id'] = $data['hosting_company_id'];
+            }
+            if (isset($data['status'])) {
+                $param['status'] = $data['status'];
+            }
         }
 
         $sql .= ' ORDER BY t.created_at DESC';
+
+        if (isset($data['limit'])) {
+            $sql .= ' LIMIT '. $data['limit'];
+        }
 
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
 
@@ -84,7 +95,7 @@ class HostingReviewModel extends \Model\BaseModel
 
     public function getLastData($data = null)
     {
-        $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email  
+        $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email, r.image   
             FROM {tablePrefix}ext_hosting_review t 
             LEFT JOIN {tablePrefix}ext_hosting_reviewer r ON r.id = t.reviewer_id 
             WHERE 1';

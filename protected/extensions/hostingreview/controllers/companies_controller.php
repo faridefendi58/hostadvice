@@ -474,7 +474,9 @@ class CompaniesController extends BaseController
                 $model->reviewer_id = $_POST['HostingFeature']['reviewer_id'];
             }
             if (!empty($_POST['HostingReview']['rate'])) {
-                $model->rate = $_POST['HostingReview']['rate'];
+                $a = array_filter($_POST['HostingReview']['rate']);
+                $average = array_sum($a)/count($a);
+                $model->rate = $average;
             }
             $model->hosting_company_id = $args['id'];
             $model->content = $_POST['HostingReview']['content'];
@@ -489,6 +491,7 @@ class CompaniesController extends BaseController
 
             if ($save) {
                 // create new feature if any
+                $reviewer_id = 0;
                 if ($new_reviewer) {
                     $check_data = \ExtensionsModel\HostingReviewerModel::model()->findByAttributes(['email' => $_POST['HostingReview']['reviewer_email']]);
                     if ($check_data instanceof \RedBeanPHP\OODBBean) {
@@ -496,6 +499,8 @@ class CompaniesController extends BaseController
                         $model3->reviewer_id = $check_data->id;
                         $model3->updated_at = date("Y-m-d H:i:s");
                         $update = \ExtensionsModel\HostingReviewModel::model()->update($model3);
+
+                        $reviewer_id = $check_data->id;
                     } else {
                         // save image if any
                         $uploadfile = null;
@@ -527,10 +532,24 @@ class CompaniesController extends BaseController
                                 $model3->reviewer_id = $model2->id;
                                 $model3->updated_at = date("Y-m-d H:i:s");
                                 $update = \ExtensionsModel\HostingReviewModel::model()->update($model3);
+
+                                $reviewer_id = $model2->id;
                             }
                         } catch (\Exception $e) {
                             var_dump($e->getMessage()); exit;
                         }
+                    }
+                }
+
+                // save the rate
+                if (!empty($_POST['HostingReview']['rate']) && is_array($_POST['HostingReview']['rate'])) {
+                    foreach ($_POST['HostingReview']['rate'] as $category_id => $rate_val) {
+                        $model4 = new \ExtensionsModel\HostingRateModel();
+                        $model4->reviewer_id = $reviewer_id;
+                        $model4->category_id = $category_id;
+                        $model4->value = $rate_val;
+                        $model4->created_at = date("Y-m-d H:i:s");
+                        $save3 = \ExtensionsModel\HostingRateModel::model()->save($model4);
                     }
                 }
 

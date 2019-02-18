@@ -21,43 +21,52 @@
     </div>
     <div class="form-group">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="control-label">Email Reviewer</label>
                 <input name="HostingReview[reviewer_email]" type="text" class="form-control reviewer-email" value="{{ pmodel.reviewer_email }}" onchange="checkAccount(this);">
             </div>
-            <div class="col-md-6">
-                <label class="control-label">Rate</label>
-                {% set rates = [1,2,3,4,5,6,7,8,9,10] %}
-                <select name="HostingReview[rate]" class="form-control">
-                    {% for i,rate in rates %}
-                    <option value="{{ rate }}">{{ rate }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="clearfix mb15"></div>
-    </div>
-    <div class="form-group">
-        <label class="control-label">Image</label>
-        <div class="fileupload fileupload-new" data-provides="fileupload">
-            <div class="input-append">
-                <div class="uneditable-input">
-                    <i class="glyphicon glyphicon-file fileupload-exists"></i>
-                    <span class="fileupload-preview"></span>
-                </div>
-                <span class="btn btn-default btn-file">
+            <div class="col-md-8">
+                <label class="control-label">Image</label>
+                <div class="fileupload fileupload-new" data-provides="fileupload">
+                    <div class="input-append">
+                        <div class="uneditable-input">
+                            <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                        </div>
+                        <span class="btn btn-default btn-file">
                             <span class="fileupload-new">Select file</span>
                             <span class="fileupload-exists">Change</span>
                             <input type="file" name="HostingReview[reviewer_image]" class="reviewer-image"/>
                         </span>
-                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+                        <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="clearfix mb15"></div>
     </div>
     <div class="form-group">
-        <label class="control-label">Isi Review <span class="red">*</span></label>
-        <textarea name="HostingReview[content]" class="form-control review-content" required>{{ pmodel.content }}</textarea>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="control-label">Isi Review <span class="red">*</span></label>
+                <textarea name="HostingReview[content]" class="form-control review-content" rows="9" required>{{ pmodel.content }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="control-label">Rate</label>
+                {% set rates = [1,2,3,4,5,6,7,8,9,10] %}
+                {% set categories = App.call.model("\\ExtensionsModel\\HostingRateCategoryModel", 'getData', {}) %}
+                {% for ci, category in categories %}
+                <div class="input-group mb10">
+                    <span class="input-group-addon">{{ category.title }}</span>
+                    <select name="HostingReview[rate][{{ category.id }}]" class="form-control required">
+                        {% for i,rate in rates %}
+                        <option value="{{ rate }}">{{ rate }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
     <input type="hidden" name="HostingReview[hosting_company_id]" value="{{ hosting_company_id }}">
     <input type="hidden" name="HostingReview[reviewer_id]" value="" id="hosting_reviewer_id">
