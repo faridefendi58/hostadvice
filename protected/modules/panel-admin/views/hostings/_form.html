@@ -43,6 +43,10 @@
                 <input name="HostingCompany[affiliate_url]" type="text" class="form-control required" value="{{ configs.affiliate_url }}" required>
             </div>
             <div class="form-group">
+                <label class="control-label">Rangking <span class="red">*</span></label>
+                <input name="HostingCompany[rangking]" type="text" class="form-control" value="{{ model.rangking | default(0) }}">
+            </div>
+            <div class="form-group">
                 <label class="control-label">Alamat</label>
                 <textarea name="HostingCompany[address]" class="form-control">{{ model.address }}</textarea>
             </div>

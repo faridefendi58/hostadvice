@@ -139,4 +139,14 @@ class Tool
 
         return $text;
     }
+
+    public function get_current_language() {
+        $current_lang = self::getConfigs('language');
+        $lang = 'en';
+        if (!empty($current_lang)) {
+            $lang = $current_lang;
+        }
+
+        return $lang;
+    }
 }

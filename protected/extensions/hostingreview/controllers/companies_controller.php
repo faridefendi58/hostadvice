@@ -90,6 +90,9 @@ class CompaniesController extends BaseController
                 $configs['affiliate_url'] = $_POST['HostingCompany']['affiliate_url'];
             }
             $model->configs = json_encode($configs);
+            if (isset($_POST['HostingCompany']['rangking'])) {
+                $model->rangking = $_POST['HostingCompany']['rangking'];
+            }
             $model->created_at = date('Y-m-d H:i:s');
             $model->created_by = $this->_user->id;
             $save = \ExtensionsModel\HostingCompanyModel::model()->save($model);
@@ -149,6 +152,9 @@ class CompaniesController extends BaseController
             $model->status = $_POST['HostingCompany']['status'];
             if (isset($_POST['HostingCompany']['affiliate_url'])) {
                 $configs['affiliate_url'] = $_POST['HostingCompany']['affiliate_url'];
+            }
+            if (isset($_POST['HostingCompany']['rangking'])) {
+                $model->rangking = $_POST['HostingCompany']['rangking'];
             }
             $model->configs = json_encode($configs);
             $model->updated_at = date('Y-m-d H:i:s');
