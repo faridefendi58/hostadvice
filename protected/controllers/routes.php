@@ -122,7 +122,7 @@ $app->post('/kontak-kami', function ($request, $response, $args) {
 
             //Content
             $mail->isHTML(true);
-            $mail->Subject = '[slightSite] Kontak Kami';
+            $mail->Subject = '[BestWH] Kontak Kami';
             $mail->Body = "Halo Admin, 
 	        <br/><br/>
             Ada pesan baru dari pengunjung dengan data berikut:

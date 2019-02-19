@@ -69,7 +69,7 @@ class TranslationsController extends BaseController
             $data = $_POST['Translation'];
 
             foreach ($data['translated_text'] as $lang_id => $t_text) {
-                $model = new \ExtensionsModel\ProductCategoryModel('create');
+                $model = new \ExtensionsModel\TranslationModel('create');
                 $model->original_text = $data['original_text'];
                 $model->language_id = $lang_id;
                 $model->translated_text = $t_text;
