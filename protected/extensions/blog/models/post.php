@@ -62,10 +62,11 @@ class PostModel extends \Model\BaseModel
     public function getPosts($data)
     {
         $sql = "SELECT t.status, c.post_id, c.title, c.meta_description, c.content, c.slug, l.id, l.language_name, 
-        t.created_at, t.updated_at      
+        t.created_at, t.updated_at, ad.username AS author   
         FROM {tablePrefix}ext_post t 
         LEFT JOIN {tablePrefix}ext_post_content c ON c.post_id = t.id 
-        LEFT JOIN {tablePrefix}ext_post_language l ON l.id = c.language";
+        LEFT JOIN {tablePrefix}ext_post_language l ON l.id = c.language
+        LEFT JOIN {tablePrefix}admin ad ON ad.id = t.author_id  ";
 
         if (isset($data['category_id'])) {
             $sql .= " LEFT JOIN {tablePrefix}ext_post_in_category ct ON ct.post_id = t.id";
@@ -86,6 +87,10 @@ class PostModel extends \Model\BaseModel
         if (isset($data['category_id'])) {
             $sql .= " AND ct.category_id = :category_id";
             $params['category_id'] = $data['category_id'];
+        }
+
+        if (isset($data['q']) && !empty($data['q'])) {
+            $sql .= " AND c.title LIKE '%".$data['q']."%' OR c.content LIKE '%".$data['q']."%'";
         }
 
         if (isset($data['order'])) {

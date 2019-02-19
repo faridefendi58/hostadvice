@@ -3,9 +3,12 @@
 $app->get('/blog', function ($request, $response, $args) {
     $model = new \ExtensionsModel\PostModel();
 
+    $params = $request->getParams();
+
     return $this->view->render($response, 'blog.phtml', [
         'name' => $args['name'],
-        'mpost' => $model
+        'mpost' => $model,
+        'params' => $params
     ]);
 });
 $app->get('/blog/[{name}]', function ($request, $response, $args) {
@@ -18,13 +21,15 @@ $app->get('/blog/[{name}]', function ($request, $response, $args) {
     if (!file_exists($theme['path'].'/'.$theme['name'].'/views/'.$args['name'].'.phtml')) {
         $data = $model->getPost($args['name']);
 
+        $params = $request->getParams();
         if (empty($data['id'])) {
             $category = $model->getCategory(['slug' => $args['name']]);
             if (is_array($category) && !empty($category['id'])) {
 
                 return $this->view->render($response, 'blog.phtml', [
                     'category' => $category,
-                    'mpost' => $model
+                    'mpost' => $model,
+                    'params' => $params
                 ]);
             }
 
@@ -35,7 +40,8 @@ $app->get('/blog/[{name}]', function ($request, $response, $args) {
 
         return $this->view->render($response, 'post.phtml', [
             'data' => $data,
-            'mpost' => $model
+            'mpost' => $model,
+            'params' => $params
         ]);
     }
 
