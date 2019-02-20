@@ -116,4 +116,28 @@ class HostingReviewModel extends \Model\BaseModel
 
         return $row;
     }
+
+    public function getRate($data = null)
+    {
+        $sql = 'SELECT AVG(r.value) AS average, COUNT(t.reviewer_id) AS tot_reviewer   
+            FROM {tablePrefix}ext_hosting_review t 
+            JOIN {tablePrefix}ext_hosting_rate r ON r.id = t.reviewer_id 
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (isset($data['hosting_company_id'])) {
+                $sql .= ' AND t.hosting_company_id=:hosting_company_id';
+                $params['hosting_company_id'] = $data['hosting_company_id'];
+            }
+        }
+
+        $sql .= ' ORDER BY t.created_at DESC LIMIT 1';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $row = \Model\R::getRow( $sql, $params );
+
+        return $row;
+    }
 }
