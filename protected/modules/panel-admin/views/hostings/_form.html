@@ -2,7 +2,7 @@
 {% if message %}
 <div class="alert {% if success %}alert-success{% else %}alert-warning{% endif %}">{{ message }}</div>
 {% endif %}
-<form method="post" id="page-create">
+<form method="post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -41,6 +41,27 @@
             <div class="form-group">
                 <label class="control-label">Affiliate Url <span class="red">*</span></label>
                 <input name="HostingCompany[affiliate_url]" type="text" class="form-control required" value="{{ configs.affiliate_url }}" required>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Logo</label>
+                {% if configs.logo %}
+                <img src="{{ configs.logo | link }}" class="img-responsive"/>
+                {% endif %}
+                <div class="fileupload fileupload-new" data-provides="fileupload">
+                    <div class="input-append">
+                        <div class="uneditable-input">
+                            <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                        </div>
+                        <span class="btn btn-default btn-file">
+                            <span class="fileupload-new">Select file</span>
+                            <span class="fileupload-exists">Change</span>
+                            <input type="file" name="HostingCompany[logo]" class="reviewer-image"/>
+                        </span>
+                        <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+                    </div>
+                </div>
+                <span class="help-block">Ukuran gambar ideal 250 x 63px</span>
             </div>
             <div class="form-group">
                 <label class="control-label">Rangking <span class="red">*</span></label>

@@ -95,8 +95,28 @@ class CompaniesController extends BaseController
             }
             $model->created_at = date('Y-m-d H:i:s');
             $model->created_by = $this->_user->id;
-            $save = \ExtensionsModel\HostingCompanyModel::model()->save($model);
+            $save = \ExtensionsModel\HostingCompanyModel::model()->save(@$model);
             if ($save) {
+                $uploadfile = null;
+                if (isset($_FILES['HostingCompany'])) {
+                    $path_info = pathinfo($_FILES['HostingCompany']['name']['logo']);
+                    if (in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                        $upload_folder = 'uploads/images/companies';
+                        $file_name = time().'.'.$path_info['extension'];
+                        $uploadfile = $upload_folder . '/' . $file_name;
+                        try {
+                            $upload = move_uploaded_file($_FILES['HostingCompany']['tmp_name']['logo'], $uploadfile);
+                            if ($upload) {
+                                $umodel = \ExtensionsModel\HostingCompanyModel::model()->findByPk($model->id);
+                                $configs['logo'] = $uploadfile;
+                                $umodel->configs = json_encode($configs);
+                                $umodel->updated_by = $this->_user->id;
+                                $update = \ExtensionsModel\HostingCompanyModel::model()->update($umodel);
+                            }
+                        } catch (\Exception $e) {}
+                    }
+                }
+
                 $message = 'Data berhasil disimpan';
                 $success = true;
             } else {
@@ -162,6 +182,25 @@ class CompaniesController extends BaseController
             $update = \ExtensionsModel\HostingCompanyModel::model()->update($model);
             if ($update) {
                 $detail = $hcmodel->getDetail($model->id);
+                $uploadfile = null;
+                if (isset($_FILES['HostingCompany'])) {
+                    $path_info = pathinfo($_FILES['HostingCompany']['name']['logo']);
+                    if (in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                        $upload_folder = 'uploads/images/companies';
+                        $file_name = time().'.'.$path_info['extension'];
+                        $uploadfile = $upload_folder . '/' . $file_name;
+                        try {
+                            $upload = move_uploaded_file($_FILES['HostingCompany']['tmp_name']['logo'], $uploadfile);
+                            if ($upload) {
+                                $umodel = \ExtensionsModel\HostingCompanyModel::model()->findByPk($model->id);
+                                $configs['logo'] = $uploadfile;
+                                $umodel->configs = json_encode($configs);
+                                $umodel->updated_by = $this->_user->id;
+                                $update2 = \ExtensionsModel\HostingCompanyModel::model()->update($umodel);
+                            }
+                        } catch (\Exception $e) {}
+                    }
+                }
                 $message = 'Data berhasil diubah';
                 $success = true;
             } else {
