@@ -215,6 +215,7 @@ class CompaniesController extends BaseController
 
                     $ctrs = [];
                     foreach ($_POST['HostingCompany']['server_location'] as $il => $country_id) {
+                        $countr = \Model\CountryModel::model()->findByPk($country_id);
                         $cek_data = \ExtensionsModel\HostingServerLocationModel::model()->findByAttributes(['hosting_company_id' => $model->id, 'country_id' => $country_id]);
                         if (!$cek_data instanceof \RedBeanPHP\OODBBean) {
                             $srv_model = new \ExtensionsModel\HostingServerLocationModel();
@@ -223,9 +224,10 @@ class CompaniesController extends BaseController
                             $srv_model->created_at = date('Y-m-d H:i:s');
                             $save = \ExtensionsModel\HostingServerLocationModel::model()->save($srv_model);
                             if ($save) {
-                                $countr = \Model\CountryModel::model()->findByPk($country_id);
                                 $ctrs[$country_id] = ['code' => $countr->code, 'title' => $countr->title];
                             }
+                        } else {
+                            $ctrs[$country_id] = ['code' => $countr->code, 'title' => $countr->title];
                         }
                     }
 
