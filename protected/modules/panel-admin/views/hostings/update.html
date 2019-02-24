@@ -7,6 +7,8 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 <link rel="stylesheet" href="{{ 'lib/DataTables/media/css/jquery.dataTables.min.css' | admin_asset_url }}">
 <link rel="stylesheet" href="{{ 'lib/select2/select2.css' | admin_asset_url }}">
 <link rel="stylesheet" href="{{ 'css/bootstrap-fileupload.min.css' | admin_asset_url }}" />
+{#<link rel="stylesheet" href="{{ 'lib/multi-select/css/multi-select.css' | admin_asset_url }}" />#}
+<link rel="stylesheet" href="{{ 'icons/flags/flags.css' | admin_asset_url }}">
 
 <div id="main_wrapper">
 	<div class="page_bar clearfix">
@@ -109,6 +111,8 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 <script src="{{ 'lib/DataTables/media/js/jquery.dataTables.min.js' | admin_asset_url }}"></script>
 <script src="{{ 'lib/select2/select2.min.js' | admin_asset_url }}"></script>
 <script src="{{ 'js/bootstrap-fileupload.min.js' | admin_asset_url }}"></script>
+{#<script src="{{ 'lib/multi-select/js/jquery.multi-select.js' | admin_asset_url }}"></script>
+<script src="{{ 'js/jquery.quicksearch.js' | admin_asset_url }}"></script>#}
 <script type="text/javascript">
 $(function () {
     if($('#s2_basic').length) {
@@ -116,6 +120,31 @@ $(function () {
             allowClear: true,
             placeholder: "Select..."
         });
+    }
+
+    if($('#s2_ext_value').length) {
+
+        var country_codes = new Object();
+        $('#s2_ext_value').find('option').each(function () {
+            country_codes[$(this).attr('value')] = $(this).attr('data-code');
+        });
+
+        function format(state) {
+            if (!state.id) return state.text;
+            return '<i class="flag-' + country_codes[state.id] + '"></i>' + state.text;
+        }
+
+        var sel_val = new Array();
+        $('#s2_ext_value').find('option:selected').each(function () {
+			sel_val.push($(this).attr('value'));
+        });
+        $('#s2_ext_value').select2({
+            placeholder: "Select Country",
+            formatResult: format,
+            formatSelection: format,
+            escapeMarkup: function(markup) { return markup; }
+        }).val(sel_val).trigger("change");
+
     }
 });
 </script>

@@ -27,7 +27,7 @@ class CountryModel extends \Model\BaseModel
         ];
     }
 
-    public function getItems()
+    public function getItems($data = array())
     {
         $sql = 'SELECT t.*  
           FROM {tablePrefix}country t 
@@ -36,13 +36,18 @@ class CountryModel extends \Model\BaseModel
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
 
         $options = R::getAll( $sql );
-        $items = [];
-        if (is_array($options)) {
-            foreach ($options as $i => $option) {
-                $items[$option['code']] = $option['title'];
+
+        if (isset($data['in_array'])) {
+            $items = [];
+            if (is_array($options)) {
+                foreach ($options as $i => $option) {
+                    $items[$option['code']] = $option['title'];
+                }
             }
+
+            return $items;
         }
 
-        return $items;
+        return $options;
     }
 }

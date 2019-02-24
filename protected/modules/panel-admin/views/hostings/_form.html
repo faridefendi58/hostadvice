@@ -68,6 +68,15 @@
                 <input name="HostingCompany[rangking]" type="text" class="form-control" value="{{ model.rangking | default(0) }}">
             </div>
             <div class="form-group">
+                <label class="control-label">Lokasi Server <span class="red">*</span></label>
+                {% set countries = App.call.model("\\Model\\CountryModel", 'getItems', {}) %}
+                <select name="HostingCompany[server_location][]" id="s2_ext_value" class="form-control" multiple>
+                    {% for ict, country in countries %}
+                    <option data-code="{{ country.code }}" value="{{ country.id }}" {% if configs.server_location[country.id] %}selected="selected"{% endif %}>{{ country.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
                 <label class="control-label">Alamat</label>
                 <textarea name="HostingCompany[address]" class="form-control">{{ model.address }}</textarea>
             </div>

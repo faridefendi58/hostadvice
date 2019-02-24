@@ -201,6 +201,34 @@ class CompaniesController extends BaseController
                         } catch (\Exception $e) {}
                     }
                 }
+
+                if (isset($_POST['HostingCompany']['server_location']) && count($_POST['HostingCompany']['server_location'])>0) {
+                    $srv_model1 = new \ExtensionsModel\HostingServerLocationModel();
+                    // delete first
+                    try {
+                        $srv_model1->deleteNotIn(['hosting_company_id' => $model->id, 'country_ids' => $_POST['HostingCompany']['server_location']]);
+                    } catch (Exception $e) {}
+
+                    $ctrs = [];
+                    foreach ($_POST['HostingCompany']['server_location'] as $il => $country_id) {
+                        $srv_model = new \ExtensionsModel\HostingServerLocationModel();
+                        $srv_model->hosting_company_id = $model->id;
+                        $srv_model->country_id = $country_id;
+                        $srv_model->created_at = date('Y-m-d H:i:s');
+                        $save = \ExtensionsModel\HostingServerLocationModel::model()->save($srv_model);
+                        if ($save) {
+                            $countr = \Model\CountryModel::model()->findByPk($country_id);
+                            $ctrs[$country_id] = ['code' => $countr->code, 'title' => $countr->title];
+                        }
+                    }
+
+                    $umodel = \ExtensionsModel\HostingCompanyModel::model()->findByPk($model->id);
+                    $c_configs = json_decode($umodel->configs, true);
+                    $c_configs['server_location'] = $ctrs;
+                    $umodel->configs = json_encode($c_configs);
+                    $umodel->updated_by = $this->_user->id;
+                    $update3 = \ExtensionsModel\HostingCompanyModel::model()->update($umodel);
+                }
                 $message = 'Data berhasil diubah';
                 $success = true;
             } else {
