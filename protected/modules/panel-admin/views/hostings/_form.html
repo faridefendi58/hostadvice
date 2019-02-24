@@ -18,6 +18,15 @@
                 <input name="HostingCompany[email]" type="text" class="form-control required" value="{{ model.email }}" required>
             </div>
             <div class="form-group">
+                <label class="control-label">Website <span class="red">*</span></label>
+                <input name="HostingCompany[website]" type="text" class="form-control required" value="{{ model.website }}" required>
+            </div>
+            {% set configs = model.configs | json_decode %}
+            <div class="form-group">
+                <label class="control-label">Affiliate Url <span class="red">*</span></label>
+                <input name="HostingCompany[affiliate_url]" type="text" class="form-control required" value="{{ configs.affiliate_url }}" required>
+            </div>
+            <div class="form-group">
                 <label class="control-label">Deskripsi</label>
                 <textarea name="HostingCompany[description]" class="form-control">{{ model.description }}</textarea>
             </div>
@@ -33,15 +42,6 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="form-group">
-                <label class="control-label">Website <span class="red">*</span></label>
-                <input name="HostingCompany[website]" type="text" class="form-control required" value="{{ model.website }}" required>
-            </div>
-            {% set configs = model.configs | json_decode %}
-            <div class="form-group">
-                <label class="control-label">Affiliate Url <span class="red">*</span></label>
-                <input name="HostingCompany[affiliate_url]" type="text" class="form-control required" value="{{ configs.affiliate_url }}" required>
-            </div>
             <div class="form-group">
                 <label class="control-label">Logo</label>
                 {% if configs.logo %}

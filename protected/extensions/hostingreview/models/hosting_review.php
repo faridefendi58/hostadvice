@@ -121,7 +121,7 @@ class HostingReviewModel extends \Model\BaseModel
     {
         $sql = 'SELECT AVG(r.value) AS average, COUNT(t.reviewer_id) AS tot_reviewer   
             FROM {tablePrefix}ext_hosting_review t 
-            JOIN {tablePrefix}ext_hosting_rate r ON r.id = t.reviewer_id 
+            JOIN {tablePrefix}ext_hosting_rate r ON r.review_id = t.id 
             WHERE 1';
 
         $params = [];
@@ -139,5 +139,31 @@ class HostingReviewModel extends \Model\BaseModel
         $row = \Model\R::getRow( $sql, $params );
 
         return $row;
+    }
+
+    public function getRateCategory($data = null)
+    {
+        $sql = 'SELECT r.category_id, c.title AS category_name, c.configs AS category_configs, 
+            AVG(r.value) AS average, COUNT(t.reviewer_id) AS tot_reviewer   
+            FROM {tablePrefix}ext_hosting_review t 
+            JOIN {tablePrefix}ext_hosting_rate r ON r.review_id = t.id 
+            LEFT JOIN {tablePrefix}ext_hosting_rate_category c ON c.id = r.category_id 
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (isset($data['hosting_company_id'])) {
+                $sql .= ' AND t.hosting_company_id=:hosting_company_id';
+                $params['hosting_company_id'] = $data['hosting_company_id'];
+            }
+        }
+
+        $sql .= ' GROUP BY r.category_id ORDER BY t.created_at DESC';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+
+        return $rows;
     }
 }

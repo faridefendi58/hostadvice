@@ -83,4 +83,23 @@ class HostingCompanyModel extends \Model\BaseModel
 
         return $row;
     }
+
+    public function getItem($data)
+    {
+        $sql = 'SELECT t.* 
+            FROM {tablePrefix}ext_hosting_company t 
+            WHERE 1';
+
+        $params = [];
+        if (isset($data['title'])) {
+            $sql.= ' AND LOWER(t.title)=:title';
+            $params['title'] = $data['title'];
+        }
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $row = \Model\R::getRow( $sql, $params );
+
+        return $row;
+    }
 }

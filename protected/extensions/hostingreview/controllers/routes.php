@@ -1,14 +1,13 @@
 <?php
 // frontend url
-/*$app->get('/hosting', function ($request, $response, $args) {
-    $model = new \ExtensionsModel\PostModel();
+$app->get('/hosting-company/[{name}]', function ($request, $response, $args) {
+    $model = new \ExtensionsModel\HostingCompanyModel();
+    $data = $model->getItem(['title' => $args['name']]);
 
-    return $this->view->render($response, 'blog.phtml', [
-        'name' => $args['name'],
-        'mpost' => $model
+    return $this->view->render($response, 'hosting_company.phtml', [
+        'data' => $data
     ]);
 });
-*/
 
 foreach (glob(__DIR__.'/*_controller.php') as $controller) {
 	$cname = basename($controller, '.php');

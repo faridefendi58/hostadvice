@@ -590,7 +590,7 @@ class CompaniesController extends BaseController
                 if (!empty($_POST['HostingReview']['rate']) && is_array($_POST['HostingReview']['rate'])) {
                     foreach ($_POST['HostingReview']['rate'] as $category_id => $rate_val) {
                         $model4 = new \ExtensionsModel\HostingRateModel();
-                        $model4->reviewer_id = $reviewer_id;
+                        $model4->review_id = $model->id;
                         $model4->category_id = $category_id;
                         $model4->value = $rate_val;
                         $model4->created_at = date("Y-m-d H:i:s");
