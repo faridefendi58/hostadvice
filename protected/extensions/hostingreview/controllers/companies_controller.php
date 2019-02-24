@@ -202,23 +202,30 @@ class CompaniesController extends BaseController
                     }
                 }
 
-                if (isset($_POST['HostingCompany']['server_location']) && count($_POST['HostingCompany']['server_location'])>0) {
+                if (isset($_POST['HostingCompany']['server_location'])) {
                     $srv_model1 = new \ExtensionsModel\HostingServerLocationModel();
                     // delete first
                     try {
-                        $srv_model1->deleteNotIn(['hosting_company_id' => $model->id, 'country_ids' => $_POST['HostingCompany']['server_location']]);
+                        if (count($_POST['HostingCompany']['server_location'])>0) {
+                            $srv_model1->deleteNotIn(['hosting_company_id' => $model->id, 'country_ids' => $_POST['HostingCompany']['server_location']]);
+                        } else {
+                            $del = \ExtensionsModel\HostingServerLocationModel::model()->deleteAllByAttributes(['hosting_company_id' => $model->id]);
+                        }
                     } catch (Exception $e) {}
 
                     $ctrs = [];
                     foreach ($_POST['HostingCompany']['server_location'] as $il => $country_id) {
-                        $srv_model = new \ExtensionsModel\HostingServerLocationModel();
-                        $srv_model->hosting_company_id = $model->id;
-                        $srv_model->country_id = $country_id;
-                        $srv_model->created_at = date('Y-m-d H:i:s');
-                        $save = \ExtensionsModel\HostingServerLocationModel::model()->save($srv_model);
-                        if ($save) {
-                            $countr = \Model\CountryModel::model()->findByPk($country_id);
-                            $ctrs[$country_id] = ['code' => $countr->code, 'title' => $countr->title];
+                        $cek_data = \ExtensionsModel\HostingServerLocationModel::model()->findByAttributes(['hosting_company_id' => $model->id, 'country_id' => $country_id]);
+                        if (!$cek_data instanceof \RedBeanPHP\OODBBean) {
+                            $srv_model = new \ExtensionsModel\HostingServerLocationModel();
+                            $srv_model->hosting_company_id = $model->id;
+                            $srv_model->country_id = $country_id;
+                            $srv_model->created_at = date('Y-m-d H:i:s');
+                            $save = \ExtensionsModel\HostingServerLocationModel::model()->save($srv_model);
+                            if ($save) {
+                                $countr = \Model\CountryModel::model()->findByPk($country_id);
+                                $ctrs[$country_id] = ['code' => $countr->code, 'title' => $countr->title];
+                            }
                         }
                     }
 

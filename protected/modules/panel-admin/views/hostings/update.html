@@ -115,6 +115,13 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 <script src="{{ 'js/jquery.quicksearch.js' | admin_asset_url }}"></script>#}
 <script type="text/javascript">
 $(function () {
+    var success_message = "{{ message }}";
+    if (success_message && success_message.length > 0) {
+        setTimeout(function () {
+            window.location.href = "{{ 'hosting/companies/update' | link }}/{{ model.id }}";
+        }, 3000);
+    }
+
     if($('#s2_basic').length) {
         $('#s2_basic').select2({
             allowClear: true,
