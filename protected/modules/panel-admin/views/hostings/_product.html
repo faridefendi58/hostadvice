@@ -59,7 +59,7 @@
                             <td>{% if product_data.status > 0 %}Enabled{% else %}Disabled{% endif %}</td>
                             <td>
                                 <a href="#" onclick="return updateProductFeature(this);" rel-id="{{ product_data.id }}">
-                                    <i class="fa fa-refresh"></i>
+                                    <i class="fa fa-pencil"></i>
                                 </a>
                                 <a href="{{ 'hosting/companies/delete-product-feature' | link }}/{{ product_data.id }}" onclick="return hapusFitur(this);">
                                     <i class="fa fa-trash-o"></i>
@@ -74,11 +74,12 @@
                         </tbody>
                     </table>
                 </div>
+                <a href="javascript:void(0);"
+                   class="btn btn-success" attr-id="{{ ci }}" onclick="return addProductFeature(this);">Tambah Produk {{ cat_ids.title }}</a>
                 <div class="clearfix mb30"></div>
-                <h3 class="mb20">Tambah Produk {{ cat_ids.title }}</h3>
-                <hr/>
                 <!-- end list data -->
-                <form id="product-feature-form-{{ ci }}" method="post" action="{{ 'hosting/companies/create-product-feature' | link }}/{{ ci }}">
+                <form id="product-feature-form-{{ ci }}" method="post"
+                      action="{{ 'hosting/companies/create-product-feature' | link }}/{{ ci }}" style="display: none;">
                     <div class="alert alert-success" style="display: none;"></div>
                     <div class="alert alert-warning" style="display: none;"></div>
                 <div class="row">
@@ -232,6 +233,14 @@
     }
 
     function updateProductFeature(dt) {
+        return false;
+    }
+
+    function addProductFeature(dt) {
+        var id = $(dt).attr('attr-id');
+        var form_id = "product-feature-form-"+ id;
+        $('form[id="'+ form_id +'"]').toggle();
+
         return false;
     }
 </script>
