@@ -238,6 +238,24 @@ class CompaniesController extends BaseController
                     $umodel->updated_by = $this->_user->id;
                     $update3 = \ExtensionsModel\HostingCompanyModel::model()->update($umodel);
                 }
+
+                if (isset($_POST['HostingCompany']['product_category_id'])) {
+                    $cat_model = new \ExtensionsModel\HostingServerLocationModel();
+
+                    $cats = [];
+                    foreach ($_POST['HostingCompany']['product_category_id'] as $ict => $category_id) {
+                        $ct_model = \ExtensionsModel\HostingProductCategoryModel::model()->findByPk($category_id);
+                        $cats[$category_id] = ['id' => $ct_model->id, 'title' => $ct_model->title];
+                    }
+
+                    $umodel = \ExtensionsModel\HostingCompanyModel::model()->findByPk($model->id);
+                    $c_configs = json_decode($umodel->configs, true);
+                    $c_configs['product_category_id'] = $cats;
+                    $umodel->configs = json_encode($c_configs);
+                    $umodel->updated_by = $this->_user->id;
+                    $update4 = \ExtensionsModel\HostingCompanyModel::model()->update($umodel);
+                }
+
                 $message = 'Data berhasil diubah';
                 $success = true;
             } else {

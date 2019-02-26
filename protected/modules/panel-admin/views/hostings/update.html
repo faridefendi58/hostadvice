@@ -34,6 +34,7 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 							<ul class="nav nav-tabs" id="tabs_a">
 								<li class="active"><a data-toggle="tab" href="#detail">Detail Layanan</a></li>
 								<li><a data-toggle="tab" href="#ubah">Ubah Data</a></li>
+								<li><a data-toggle="tab" href="#service-product">Produk Layanan</a></li>
 								<li><a data-toggle="tab" href="#paket-hosting">Paket Hosting</a></li>
 								<li><a data-toggle="tab" href="#fitur">Fitur Layanan</a></li>
 								<li><a data-toggle="tab" href="#review">Review</a></li>
@@ -85,6 +86,9 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 								</div>
 								<div id="ubah" class="tab-pane fade">
 									{% include 'hostings/_form.html' with {'model':model, 'message':message} %}
+								</div>
+								<div id="service-product" class="tab-pane fade">
+									{% include 'hostings/_product.html' with {'model':model} %}
 								</div>
 								<div id="paket-hosting" class="tab-pane fade">
 									{% include 'hostings/_package.html' with {'model':model, 'plans':plans} %}
@@ -152,6 +156,18 @@ $(function () {
             escapeMarkup: function(markup) { return markup; }
         }).val(sel_val).trigger("change");
 
+    }
+
+    if($('#s1_ext_value').length) {
+        var sel_val2 = new Array();
+        $('#s1_ext_value').find('option:selected').each(function () {
+            sel_val2.push($(this).attr('value'));
+        });
+
+        $('#s1_ext_value').select2({
+            allowClear: true,
+            placeholder: "Select...",
+        }).val(sel_val2).trigger("change");
     }
 });
 </script>

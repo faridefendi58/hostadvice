@@ -1,0 +1,88 @@
+<div class="row">
+    <div class="col-md-6">
+        {{ model.configs | dump }}
+        {#<div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+            <div class="alert alert-success" id="alert-update-service_type" style="display: none;"></div>
+            <table class="table table-responsive dataTable">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Paket</th>
+                    <th>Harga (Per Tahun)</th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% set service_types = App.call.model("\\ExtensionsModel\\HostingCompanyProductModel", 'getData', {}) %}
+                {% for i, service_type in service_types %}
+                <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>
+                        <input type="text" name="HostingProduct[title][{{ service_type.id }}]" value="{{ service_type.title }}" class="form-control p_title">
+                    </td>
+                    <td>
+                        <input type="text" name="HostingProduct[price][{{ service_type.id }}]" value="{{ service_type.price_1y }}" class="form-control p_value">
+                    </td>
+                    <td>
+                        <a href="#" onclick="return updatePlan(this);" rel-id="{{ service_type.id }}">
+                            <i class="fa fa-refresh"></i>
+                        </a>
+                        <a href="{{ 'hosting/companies/delete-service_type' | link }}/{{ service_type.id }}" onclick="return hapusPlan(this);">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>#}
+    </div>
+    <div class="col-md-6">
+        {# include 'hostings/_form_service_type.html' with {'hosting_company_id':model.id} #}
+    </div>
+</div>
+<script type="text/javascript">
+    function hapusPlan(dt) {
+        if (confirm('Anda yakin ingin menghapus item ini ?')) {
+            var $this =  $(dt);
+            var url = $this.attr('href');
+            $.ajax({
+                'url': url,
+                'type':'post',
+                'success': function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        $this.parent().parent().remove();
+                    }
+                }
+            });
+        }
+        return false;
+    }
+    function updatePlan(dt) {
+        var $this =  $(dt);
+        var url = "{{ 'hosting/companies/update-service_type' | link }}/"+ $this.attr('rel-id');
+        var p_title = $this.parent().parent().find('.p_title').val();
+        var p_value = $this.parent().parent().find('.p_value').val();
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data':{'id':$this.attr('rel-id'),'title':p_title,'price_1y':p_value},
+            'dataType':'json',
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    $('#alert-update-service_type').html(data.message);
+                    $('#alert-update-service_type').show();
+                    setTimeout(function () {
+                        $('#alert-update-service_type').hide();
+                    }, 2000);
+                } else {
+                    $('#alert-update-service_type').hide();
+                }
+            }
+        });
+
+        return false;
+    }
+</script>

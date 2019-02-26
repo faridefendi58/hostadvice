@@ -1,0 +1,72 @@
+<form method="post" id="plan-form" action="{{ 'hosting/companies/create-plan' | link }}/{{ hosting_company_id }}">
+    <div class="alert alert-success" style="display: none;"></div>
+    <div class="form-group">
+        <label class="control-label">Nama Paket <span class="red">*</span></label>
+        <input name="HostingPlan[title]" type="text" class="form-control required" value="{{ pmodel.title }}">
+    </div>
+    <div class="form-group">
+        <label class="control-label">Deskripsi Singkat <span class="red">*</span></label>
+        <textarea name="HostingPlan[short_description]" class="form-control required">{{ pmodel.short_description }}</textarea>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Harga<span class="red">*</span></label>
+        {% set terms = {'price_1m':'1 Bulan', 'price_3m':'3 Bulan',
+        'price_6m':'6 Bulan', 'price_1y':'1 Tahun', 'price_2y':'2 Tahun', 'price_3y':'3 Tahun'} %}
+        <div class="row">
+            {% set no = 1 %}
+            {% for term, term_name in terms %}
+            <div class="col-md-6">
+                {% set required_class = "" %}
+                {% if term == 'price_1y' %}
+                {% set required_class = 'required' %}
+                {% endif %}
+                <input name="HostingPlan[term][{{ term }}]" type="text" class="form-control {{ required_class }}" placeholder="{{ term_name }}">
+            </div>
+            {% if no is divisible by(2) %}
+        </div><div class="row">
+        {% endif %}
+        {% set no = no + 1 %}
+        {% endfor %}
+    </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Catatan</label>
+        <textarea name="HostingPlan[description]" class="form-control">{{ pmodel.description }}</textarea>
+    </div>
+    <input type="hidden" name="HostingPlan[hosting_company_id]" value="{{ hosting_company_id }}">
+    <div class="form-group">
+        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return savePlan(this);">
+    </div>
+</form>
+<script type="text/javascript">
+    function savePlan(dt) {
+        var validate = jb_validation.validate($('form[id="plan-form"]'));
+        if (!validate) {
+            return false;
+        }
+
+        var url = $(dt).parent().parent().attr('action');
+        console.log(url);
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data': $('#plan-form').serialize(),
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    var alert_success = $('#plan-form').find('.alert-success');
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    setTimeout(function () {
+                        window.location.reload(true);
+                    }, 5000);
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            }
+        });
+
+        return false;
+    }
+</script>
