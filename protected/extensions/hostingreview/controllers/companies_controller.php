@@ -878,6 +878,85 @@ class CompaniesController extends BaseController
         if (!isset($args['id'])) {
             return false;
         }
+
+        $model = \ExtensionsModel\HostingCompanyProductModel::model()->findByPk($args['id']);
+        if (isset($_POST['HostingCompanyProduct'])) {
+            // avoid double execution
+            $current_time = time();
+            if(isset($_SESSION['HostingCompanyProduct']) && !empty($_SESSION['HostingCompanyProduct'])) {
+                $selisih = $current_time - $_SESSION['HostingCompanyProduct'];
+                if ($selisih <= 10) {
+                    return $response->withJson(
+                        [
+                            'status' => 'success',
+                            'message' => 'Data berhasil disimpan.',
+                        ], 201);
+                } else {
+                    $_SESSION['HostingCompanyProduct'] = $current_time;
+                }
+            } else {
+                $_SESSION['HostingCompanyProduct'] = $current_time;
+            }
+
+            $model->title = $_POST['HostingCompanyProduct']['title'];
+            $model->company_id = $_POST['HostingCompanyProduct']['company_id'];
+            if (isset($_POST['HostingCompanyProduct']['space'])) {
+                $model->space = $_POST['HostingCompanyProduct']['space'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['bandwidth'])) {
+                $model->bandwidth = $_POST['HostingCompanyProduct']['bandwidth'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['panel'])) {
+                $model->panel = $_POST['HostingCompanyProduct']['panel'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['number_of_site'])) {
+                $model->number_of_site = $_POST['HostingCompanyProduct']['number_of_site'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['cpu_number'])) {
+                $model->cpu_number = $_POST['HostingCompanyProduct']['cpu_number'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['cpu_clock_rate'])) {
+                $model->cpu_clock_rate = $_POST['HostingCompanyProduct']['cpu_clock_rate'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['ram'])) {
+                $model->ram = $_POST['HostingCompanyProduct']['ram'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['os'])) {
+                $model->os = $_POST['HostingCompanyProduct']['os'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['score'])) {
+                $model->score = $_POST['HostingCompanyProduct']['score'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['enabled'])) {
+                $model->enabled = $_POST['HostingCompanyProduct']['enabled'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['price_range_from'])) {
+                $model->price_range_from = $_POST['HostingCompanyProduct']['price_range_from'];
+            }
+            if (isset($_POST['HostingCompanyProduct']['price_range_to'])) {
+                $model->price_range_to = $_POST['HostingCompanyProduct']['price_range_to'];
+            }
+            $model->updated_at = date("Y-m-d H:i:s");
+            try {
+                $update = \ExtensionsModel\HostingCompanyProductModel::model()->update($model);
+            } catch (\Exception $e) {
+                var_dump($e->getMessage()); exit;
+            }
+
+            if ($update) {
+                return $response->withJson(
+                    [
+                        'status' => 'success',
+                        'message' => 'Data berhasil disimpan.',
+                    ], 201);
+            } else {
+                return $response->withJson(['status'=>'failed'], 201);
+            }
+        }
+
+        return $this->_container->module->render($response, 'hostings/_form_product.html', [
+            'model' => $model,
+        ]);
     }
 
     public function delete_product_feature($request, $response, $args)

@@ -1,0 +1,108 @@
+{% set cat_data = App.call.model("\\ExtensionsModel\\HostingProductCategoryModel", 'getItem', {"id":model.category_id}) %}
+{% set cat_configs = cat_data.configs | json_decode %}
+<form id="product-feature-form-update" method="post"
+      action="{{ 'hosting/companies/update-product-feature' | link }}/{{ model.id }}">
+    <div class="alert alert-success" style="display: none;"></div>
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label class="control-label">Nama Product <span class="red">*</span></label>
+            <input name="HostingCompanyProduct[title]" type="text" class="form-control required" placeholder="ex: Starter" value="{{ model.title }}">
+        </div>
+        {% if 'space' in cat_configs.features %}
+        <div class="form-group col-md-6">
+            <label class="control-label">Space <span class="red">*</span></label>
+            <div class="input-group">
+                <input name="HostingCompanyProduct[space]" type="text" class="form-control required" placeholder="0 untuk unlimited" value="{{ model.space }}">
+                <span class="input-group-addon">GB</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if 'bandwidth' in cat_configs.features %}
+        <div class="form-group col-md-6">
+            <label class="control-label">Bandwidth <span class="red">*</span></label>
+            <div class="input-group">
+                <input name="HostingCompanyProduct[bandwidth]" type="text" class="form-control required" placeholder="0 untuk unlimited" value="{{ model.bandwidth }}">
+                <span class="input-group-addon">GB</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if 'panel' in cat_configs.features %}
+        <div class="form-group col-md-6">
+            <label class="control-label">Panel <span class="red">*</span></label>
+            {% set panels = ['cPanel', 'Webuzo', 'vestaCP'] %}
+            <select name="HostingCompanyProduct[panel]" class="form-control required">
+                {% for ip, panel in panels %}
+                <option value="{{ panel }}">{{ panel }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        {% if 'number_of_site' in cat_configs.features %}
+        <div class="form-group col-md-6">
+            <label class="control-label">Jumlah Addon Domain <span class="red">*</span></label>
+            <div class="input-group">
+                <input name="HostingCompanyProduct[number_of_site]" type="text" class="form-control required" placeholder="Bilangan bulat. ex: 1" value="{{ model.number_of_site }}">
+                <span class="input-group-addon">Domain</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if 'cpu' in cat_configs.features %}
+        <div class="form-group col-md-6">
+            <label class="control-label">CPU <span class="red">*</span></label>
+            <div class="input-group">
+                <input name="HostingCompanyProduct[cpu_number]" type="text" class="form-control required" placeholder="Jumlah CPU. ex: 1" value="{{ model.cpu_number }}">
+                <input name="HostingCompanyProduct[cpu_clock_rate]" type="text" class="form-control required" placeholder="Clock Rate. ex: 2.50" value="{{ model.cpu_clock_rate }}">
+                <span class="input-group-addon">GHz</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group col-md-6">
+            <label class="control-label">Rentang Harga <span class="red">*</span></label>
+            <div class="input-group">
+                <span class="input-group-addon">Rp.</span>
+                <input name="HostingCompanyProduct[price_range_from]" type="text" class="form-control required" placeholder="Harga Mulai. ex: 125000" value="{{ model.price_range_from }}">
+                <input name="HostingCompanyProduct[price_range_to]" type="text" class="form-control required" placeholder="Harga Hingga. ex: 300000" value="{{ model.price_range_to }}">
+            </div>
+        </div>
+
+        {% if 'ram' in cat_configs.features %}
+        <div class="form-group col-md-6">
+            <label class="control-label">RAM <span class="red">*</span></label>
+            <div class="input-group">
+                <input name="HostingCompanyProduct[ram]" type="text" class="form-control required" placeholder="1" value="{{ model.ram }}">
+                <span class="input-group-addon">GB</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if 'os' in cat_configs.features %}
+        <div class="form-group col-md-6">
+            <label class="control-label">OS <span class="red">*</span></label>
+            {% set oss = ['Linux', 'Windows'] %}
+            <select name="HostingCompanyProduct[os]" class="form-control required">
+                {% for ios, os in oss %}
+                <option value="{{ os }}" {% if model.os == os %}selected="selected"{% endif %}>{{ os }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="form-group col-md-6">
+            <label class="control-label">Skor <span class="red">*</span></label>
+            <input name="HostingCompanyProduct[score]" type="text" class="form-control required" placeholder="ex: 7.8" value="{{ model.score }}">
+        </div>
+        <div class="form-group col-md-6">
+            <label class="control-label">Status <span class="red">*</span></label>
+            {% set statuses = ['Disabled', 'Enabled'] %}
+            <select name="HostingCompanyProduct[enabled]" class="form-control">
+                {% for ist, status in statuses %}
+                <option value="{{ ist }}" {% if model.enabled == ist %}selected="selected"{% endif %}>{{ status }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="hidden" name="HostingCompanyProduct[category_id]" value="{{ model.category_id }}">
+        <input type="hidden" name="HostingCompanyProduct[company_id]" value="{{ model.company_id }}">
+        <div class="form-group col-md-12">
+            <input type="submit" name="submit" value="Submit" class="btn btn-info" onclick="return submitUpdateProductFeature(this);">
+        </div>
+    </div>
+</form>
