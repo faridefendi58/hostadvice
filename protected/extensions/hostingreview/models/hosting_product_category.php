@@ -66,4 +66,17 @@ class HostingProductCategoryModel extends \Model\BaseModel
 
         return $row;
     }
+
+    public function getItem($data = array())
+    {
+        $sql = 'SELECT t.*  
+            FROM {tablePrefix}ext_hosting_product_category t 
+            WHERE t.id =:id';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $row = \Model\R::getRow( $sql, ['id' => $data['id']] );
+
+        return $row;
+    }
 }

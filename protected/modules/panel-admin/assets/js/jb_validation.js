@@ -12,7 +12,11 @@ var jb_validation = {
         if (form.find('.required').length > 0) {
             form.find('.required').each(function () {
                 if ($(this).val().length == 0) {
-                    var label_name = $(this).parent().find('label');
+                    var input_parent = $(this).parent();
+                    if ($(this).parent().hasClass('input-group')) {
+                        var input_parent = $(this).parent().parent();
+                    }
+                    var label_name = input_parent.find('label');
                     if (label_name.length > 0) {
                         //label_name.find('span').remove();
                         label_name = label_name.html();
@@ -22,7 +26,7 @@ var jb_validation = {
                     }
 
                     var msg = "<span class=\"help-block\">"+ label_name +" tidak boleh dikosongi.</span>";
-                    $(this).parent().addClass('has-error').append(msg);
+                    input_parent.addClass('has-error').append(msg);
                     has_error = has_error + 1;
                 }
             });

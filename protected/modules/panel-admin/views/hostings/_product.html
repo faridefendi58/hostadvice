@@ -1,88 +1,237 @@
+{% set configs = model.configs | json_decode %}
 <div class="row">
+    {% for ci,cat_ids in configs.product_category_id %}
+    {% set cat_data = App.call.model("\\ExtensionsModel\\HostingProductCategoryModel", 'getItem', {"id":ci}) %}
+    {% set cat_configs = cat_data.configs | json_decode %}
     <div class="col-md-6">
-        {{ model.configs | dump }}
-        {#<div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
-            <div class="alert alert-success" id="alert-update-service_type" style="display: none;"></div>
-            <table class="table table-responsive dataTable">
-                <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama Paket</th>
-                    <th>Harga (Per Tahun)</th>
-                    <th>&nbsp;</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% set service_types = App.call.model("\\ExtensionsModel\\HostingCompanyProductModel", 'getData', {}) %}
-                {% for i, service_type in service_types %}
-                <tr>
-                    <td>{{ i + 1 }}</td>
-                    <td>
-                        <input type="text" name="HostingProduct[title][{{ service_type.id }}]" value="{{ service_type.title }}" class="form-control p_title">
-                    </td>
-                    <td>
-                        <input type="text" name="HostingProduct[price][{{ service_type.id }}]" value="{{ service_type.price_1y }}" class="form-control p_value">
-                    </td>
-                    <td>
-                        <a href="#" onclick="return updatePlan(this);" rel-id="{{ service_type.id }}">
-                            <i class="fa fa-refresh"></i>
-                        </a>
-                        <a href="{{ 'hosting/companies/delete-service_type' | link }}/{{ service_type.id }}" onclick="return hapusPlan(this);">
-                            <i class="fa fa-trash-o"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>#}
+        <div class="panel panel-info">
+            <div class="panel-heading"><span class="badge badge-info">{{ ci }}</span> {{ cat_ids.title }}</div>
+            <div class="panel-body">
+                <!-- list data -->
+                {% set product_datas = App.call.model("\\ExtensionsModel\\HostingCompanyProductModel", 'getData', {"company_id":model.id, "category_id":ci}) %}
+                <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+                    <table class="table table-responsive dataTable">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            {% if 'space' in cat_configs.features %}<th>Space</th>{% endif %}
+                            {% if 'bandwidth' in cat_configs.features %}<th>Bandwidth</th>{% endif %}
+                            {% if 'panel' in cat_configs.features %}<th>Panel</th>{% endif %}
+                            {% if 'domain' in cat_configs.features %}<th>Domain</th>{% endif %}
+                            {% if 'price' in cat_configs.features %}<th>Price</th>{% endif %}
+                            {% if 'cpu' in cat_configs.features %}<th>CPU</th>{% endif %}
+                            {% if 'ram' in cat_configs.features %}<th>RAM</th>{% endif %}
+                            {% if 'os' in cat_configs.features %}<th>OS</th>{% endif %}
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ip, product_data in product_datas %}
+                        <tr>
+                            <td>{{ product_data.title }}</td>
+                            {% if 'space' in cat_configs.features %}
+                                <td>{{ product_data.space }}GB</td>
+                            {% endif %}
+                            {% if 'bandwidth' in cat_configs.features %}
+                                <td>{{ product_data.bandwidth }}GB</td>
+                            {% endif %}
+                            {% if 'panel' in cat_configs.features %}
+                                <td>{{ product_data.panel }}</td>
+                            {% endif %}
+                            {% if 'domain' in cat_configs.features %}
+                                <td>{{ product_data.domain }}</td>
+                            {% endif %}
+                            {% if 'price' in cat_configs.features %}
+                                <td>{{ product_data.price_range_from }} - {{ product_data.price_range_to }}</td>
+                            {% endif %}
+                            {% if 'cpu' in cat_configs.features %}
+                                <td>{{ product_data.cpu_number }} x {{ product_data.cpu_clock_rate }}GHz</td>
+                            {% endif %}
+                            {% if 'ram' in cat_configs.features %}
+                                <td>{{ product_data.ram }}GB</td>
+                            {% endif %}
+                            {% if 'os' in cat_configs.features %}
+                                <td>{{ product_data.os }}</td>
+                            {% endif %}
+                            <td>{{ product_data.score }}</td>
+                            <td>{% if product_data.status > 0 %}Enabled{% else %}Disabled{% endif %}</td>
+                            <td>
+                                <a href="#" onclick="return updateProductFeature(this);" rel-id="{{ product_data.id }}">
+                                    <i class="fa fa-refresh"></i>
+                                </a>
+                                <a href="{{ 'hosting/companies/delete-product-feature' | link }}/{{ product_data.id }}" onclick="return hapusFitur(this);">
+                                    <i class="fa fa-trash-o"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr class="no-data">
+                            <td>No data founds</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix mb30"></div>
+                <h3 class="mb20">Tambah Produk {{ cat_ids.title }}</h3>
+                <hr/>
+                <!-- end list data -->
+                <form id="product-feature-form-{{ ci }}" method="post" action="{{ 'hosting/companies/create-product-feature' | link }}/{{ ci }}">
+                    <div class="alert alert-success" style="display: none;"></div>
+                    <div class="alert alert-warning" style="display: none;"></div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Nama Product <span class="red">*</span></label>
+                        <input name="HostingCompanyProduct[title][{{ ci }}]" type="text" class="form-control required" placeholder="ex: Starter">
+                    </div>
+                    {% if 'space' in cat_configs.features %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Space <span class="red">*</span></label>
+                        <div class="input-group">
+                            <input name="HostingCompanyProduct[space][{{ ci }}]" type="text" class="form-control required" placeholder="0 untuk unlimited">
+                            <span class="input-group-addon">GB</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if 'bandwidth' in cat_configs.features %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Bandwidth <span class="red">*</span></label>
+                        <div class="input-group">
+                            <input name="HostingCompanyProduct[bandwidth][{{ ci }}]" type="text" class="form-control required" placeholder="0 untuk unlimited">
+                            <span class="input-group-addon">GB</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if 'panel' in cat_configs.features %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Panel <span class="red">*</span></label>
+                        {% set panels = ['cPanel', 'Webuzo', 'vestaCP'] %}
+                        <select name="HostingCompanyProduct[panel][{{ ci }}]" class="form-control required">
+                            {% for ip, panel in panels %}
+                            <option value="{{ panel }}">{{ panel }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    {% if 'number_of_site' in cat_configs.features %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Jumlah Addon Domain <span class="red">*</span></label>
+                        <div class="input-group">
+                            <input name="HostingCompanyProduct[number_of_site][{{ ci }}]" type="text" class="form-control required" placeholder="Bilangan bulat. ex: 1">
+                            <span class="input-group-addon">Domain</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if 'cpu' in cat_configs.features %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">CPU <span class="red">*</span></label>
+                        <div class="input-group">
+                            <input name="HostingCompanyProduct[cpu_number][{{ ci }}]" type="text" class="form-control required" placeholder="Jumlah CPU. ex: 1">
+                            <input name="HostingCompanyProduct[cpu_clock_rate][{{ ci }}]" type="text" class="form-control required" placeholder="Clock Rate. ex: 2.50">
+                            <span class="input-group-addon">GHz</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Rentang Harga <span class="red">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-addon">Rp.</span>
+                            <input name="HostingCompanyProduct[price_range_from][{{ ci }}]" type="text" class="form-control required" placeholder="Harga Mulai. ex: 125000">
+                            <input name="HostingCompanyProduct[price_range_to][{{ ci }}]" type="text" class="form-control required" placeholder="Harga Hingga. ex: 300000">
+                        </div>
+                    </div>
+
+                    {% if 'ram' in cat_configs.features %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">RAM <span class="red">*</span></label>
+                        <div class="input-group">
+                            <input name="HostingCompanyProduct[ram][{{ ci }}]" type="text" class="form-control required" placeholder="1">
+                            <span class="input-group-addon">GB</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if 'os' in cat_configs.features %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">OS <span class="red">*</span></label>
+                        {% set oss = ['Linux', 'Windows'] %}
+                        <select name="HostingCompanyProduct[os][{{ ci }}]" class="form-control required">
+                            {% for ios, os in oss %}
+                            <option value="{{ os }}">{{ os }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Skor <span class="red">*</span></label>
+                        <input name="HostingCompanyProduct[score][{{ ci }}]" type="text" class="form-control required" placeholder="ex: 7.8">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Status <span class="red">*</span></label>
+                        {% set statuses = ['Disabled', 'Enabled'] %}
+                        <select name="HostingCompanyProduct[enabled][{{ ci }}]" class="form-control">
+                            {% for ist, status in statuses %}
+                            <option value="{{ ist }}" {% if ist == 1 %}selected="selected"{% endif %}>{{ status }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="hidden" name="HostingCompanyProduct[category_id][{{ ci }}]" value="{{ ci }}">
+                    <input type="hidden" name="HostingCompanyProduct[company_id][{{ ci }}]" value="{{ model.id }}">
+                    <div class="form-group col-md-12">
+                        <input type="submit" name="submit" value="Submit" class="btn btn-info" attr-id="{{ ci }}" onclick="return saveProductFeature(this);">
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="col-md-6">
-        {# include 'hostings/_form_service_type.html' with {'hosting_company_id':model.id} #}
-    </div>
+    {% endfor %}
 </div>
 <script type="text/javascript">
-    function hapusPlan(dt) {
-        if (confirm('Anda yakin ingin menghapus item ini ?')) {
-            var $this =  $(dt);
-            var url = $this.attr('href');
-            $.ajax({
-                'url': url,
-                'type':'post',
-                'success': function(data) {
-                    console.log(data);
-                    if (data.status == 'success') {
-                        $this.parent().parent().remove();
-                    }
-                }
-            });
+    function saveProductFeature(dt) {
+        var ci = $(dt).attr("attr-id");
+        var form_id = "product-feature-form-"+ ci;
+        var formData = new FormData($('form[id="'+form_id+'"]')[0]);
+        var url = $('form[id="'+form_id+'"]').attr('action');
+
+        var validate = jb_validation.validate($('form[id="'+form_id+'"]'));
+        if (!validate) {
+            return false;
         }
-        return false;
-    }
-    function updatePlan(dt) {
-        var $this =  $(dt);
-        var url = "{{ 'hosting/companies/update-service_type' | link }}/"+ $this.attr('rel-id');
-        var p_title = $this.parent().parent().find('.p_title').val();
-        var p_value = $this.parent().parent().find('.p_value').val();
+
         $.ajax({
             'url': url,
             'type':'post',
-            'data':{'id':$this.attr('rel-id'),'title':p_title,'price_1y':p_value},
-            'dataType':'json',
+            'data': formData,
+            'dataType': 'json',
+            'async': false,
             'success': function(data) {
                 console.log(data);
                 if (data.status == 'success') {
-                    $('#alert-update-service_type').html(data.message);
-                    $('#alert-update-service_type').show();
+                    var alert_success = $('#product-feature-form-'+ci).find('.alert-success');
+                    var alert_warning = $('#product-feature-form-'+ci).find('.alert-warning');
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    alert_warning.hide();
                     setTimeout(function () {
-                        $('#alert-update-service_type').hide();
-                    }, 2000);
-                } else {
-                    $('#alert-update-service_type').hide();
+                        window.location.reload(true);
+                    }, 5000);
                 }
-            }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
         });
 
+        return false;
+    }
+
+    function updateProductFeature(dt) {
         return false;
     }
 </script>

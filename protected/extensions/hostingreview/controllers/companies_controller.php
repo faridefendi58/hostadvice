@@ -28,6 +28,7 @@ class CompaniesController extends BaseController
         $app->map(['POST'], '/update-review/[{id}]', [$this, 'update_review']);
         $app->map(['POST'], '/delete-review/[{id}]', [$this, 'delete_review']);
         $app->map(['POST'], '/check-reviewer', [$this, 'check_reviewer']);
+        $app->map(['POST'], '/create-product-feature/[{id}]', [$this, 'create_product_feature']);
     }
 
     public function accessRules()
@@ -38,7 +39,8 @@ class CompaniesController extends BaseController
                     'view', 'create', 'update', 'delete',
                     'create-plan', 'update-plan', 'delete-plan',
                     'create-feature', 'update-feature', 'delete-feature',
-                    'create-review', 'update-review', 'delete-review'
+                    'create-review', 'update-review', 'delete-review',
+                    'create-product-feature'
                     ],
                 'users'=> ['@'],
             ],
@@ -762,6 +764,85 @@ class CompaniesController extends BaseController
                     'status' => 'failed',
                     'message' => 'Data tidak ditemukan.',
                 ], 201);
+        }
+    }
+
+    public function create_product_feature($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        if (!isset($args['id'])) {
+            return false;
+        }
+
+        $category_id = $args['id'];
+
+        $model = new \ExtensionsModel\HostingCompanyProductModel();
+        if (isset($_POST['HostingCompanyProduct'])) {
+            $model->title = $_POST['HostingCompanyProduct']['title'][$category_id];
+            $model->company_id = $_POST['HostingCompanyProduct']['company_id'][$category_id];
+            $model->category_id = $category_id;
+            if (isset($_POST['HostingCompanyProduct']['space'][$category_id])) {
+                $model->space = $_POST['HostingCompanyProduct']['space'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['bandwidth'][$category_id])) {
+                $model->bandwidth = $_POST['HostingCompanyProduct']['bandwidth'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['panel'][$category_id])) {
+                $model->panel = $_POST['HostingCompanyProduct']['panel'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['number_of_site'][$category_id])) {
+                $model->number_of_site = $_POST['HostingCompanyProduct']['number_of_site'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['cpu_number'][$category_id])) {
+                $model->cpu_number = $_POST['HostingCompanyProduct']['cpu_number'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['cpu_clock_rate'][$category_id])) {
+                $model->cpu_clock_rate = $_POST['HostingCompanyProduct']['cpu_clock_rate'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['ram'][$category_id])) {
+                $model->ram = $_POST['HostingCompanyProduct']['ram'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['os'][$category_id])) {
+                $model->os = $_POST['HostingCompanyProduct']['os'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['score'][$category_id])) {
+                $model->score = $_POST['HostingCompanyProduct']['score'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['enabled'][$category_id])) {
+                $model->enabled = $_POST['HostingCompanyProduct']['enabled'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['price_range_from'][$category_id])) {
+                $model->price_range_from = $_POST['HostingCompanyProduct']['price_range_from'][$category_id];
+            }
+            if (isset($_POST['HostingCompanyProduct']['price_range_to'][$category_id])) {
+                $model->price_range_to = $_POST['HostingCompanyProduct']['price_range_to'][$category_id];
+            }
+            $model->created_at = date("Y-m-d H:i:s");
+            $model->updated_at = date("Y-m-d H:i:s");
+            try {
+                $save = \ExtensionsModel\HostingCompanyProductModel::model()->save(@$model);
+            } catch (\Exception $e) {
+                var_dump($e->getMessage()); exit;
+            }
+
+            if ($save) {
+                return $response->withJson(
+                    [
+                        'status' => 'success',
+                        'message' => 'Data berhasil disimpan.',
+                    ], 201);
+            } else {
+                return $response->withJson(['status'=>'failed'], 201);
+            }
+        } else {
+            return $response->withJson(['status'=>'failed', 'messsage'=>'Tidak berhasil menyimpan data.'], 201);
         }
     }
 }

@@ -39,6 +39,15 @@ class HostingCompanyProductModel extends \Model\BaseModel
 
         $params = [];
         if (is_array($data)) {
+            if (isset($data['company_id'])) {
+                $sql .= ' AND t.company_id=:company_id';
+                $params['company_id'] = $data['company_id'];
+            }
+
+            if (isset($data['category_id'])) {
+                $sql .= ' AND t.category_id=:category_id';
+                $params['category_id'] = $data['category_id'];
+            }
         }
 
         $sql .= ' ORDER BY t.created_at DESC';
