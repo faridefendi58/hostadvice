@@ -787,6 +787,23 @@ class CompaniesController extends BaseController
 
         $model = new \ExtensionsModel\HostingCompanyProductModel();
         if (isset($_POST['HostingCompanyProduct'])) {
+            // avoid double execution
+            $current_time = time();
+            if(isset($_SESSION['HostingCompanyProduct']) && !empty($_SESSION['HostingCompanyProduct'])) {
+                $selisih = $current_time - $_SESSION['HostingCompanyProduct'];
+                if ($selisih <= 10) {
+                    return $response->withJson(
+                        [
+                            'status' => 'success',
+                            'message' => 'Data berhasil disimpan.',
+                        ], 201);
+                } else {
+                    $_SESSION['HostingCompanyProduct'] = $current_time;
+                }
+            } else {
+                $_SESSION['HostingCompanyProduct'] = $current_time;
+            }
+
             $model->title = $_POST['HostingCompanyProduct']['title'][$category_id];
             $model->company_id = $_POST['HostingCompanyProduct']['company_id'][$category_id];
             $model->category_id = $category_id;
@@ -875,6 +892,23 @@ class CompaniesController extends BaseController
 
         if (!isset($args['id'])) {
             return false;
+        }
+
+        // avoid double execution
+        $current_time = time();
+        if(isset($_SESSION['DeleteHostingCompanyProduct']) && !empty($_SESSION['DeleteHostingCompanyProduct'])) {
+            $selisih = $current_time - $_SESSION['DeleteHostingCompanyProduct'];
+            if ($selisih <= 10) {
+                return $response->withJson(
+                    [
+                        'status' => 'success',
+                        'message' => 'Data berhasil dihapus.',
+                    ], 201);
+            } else {
+                $_SESSION['DeleteHostingCompanyProduct'] = $current_time;
+            }
+        } else {
+            $_SESSION['DeleteHostingCompanyProduct'] = $current_time;
         }
 
         $model = \ExtensionsModel\HostingCompanyProductModel::model()->findByPk($args['id']);
