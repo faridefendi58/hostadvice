@@ -9,7 +9,7 @@
             <div class="panel-body">
                 <!-- list data -->
                 {% set product_datas = App.call.model("\\ExtensionsModel\\HostingCompanyProductModel", 'getData', {"company_id":model.id, "category_id":ci}) %}
-                <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+                <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive table-product-feature-{{ ci }}" role="grid">
                     <table class="table table-responsive dataTable">
                         <thead>
                         <tr>
@@ -75,7 +75,7 @@
                     </table>
                 </div>
                 <a href="javascript:void(0);"
-                   class="btn btn-success" attr-id="{{ ci }}" onclick="return addProductFeature(this);">Tambah Produk {{ cat_ids.title }}</a>
+                   class="btn btn-success btn-add-feature-{{ ci }}" attr-id="{{ ci }}" onclick="return addProductFeature(this);">Tambah Produk {{ cat_ids.title }}</a>
                 <div class="clearfix mb30"></div>
                 <!-- end list data -->
                 <form id="product-feature-form-{{ ci }}" method="post"
@@ -182,6 +182,7 @@
                     <input type="hidden" name="HostingCompanyProduct[company_id][{{ ci }}]" value="{{ model.id }}">
                     <div class="form-group col-md-12">
                         <input type="submit" name="submit" value="Submit" class="btn btn-info" attr-id="{{ ci }}" onclick="return saveProductFeature(this);">
+                        <button class="btn btn-warning" attr-id="{{ ci }}" onclick="return addProductFeature(this);">Cancel</button>
                     </div>
                 </div>
                 </form>
@@ -265,7 +266,11 @@
     function addProductFeature(dt) {
         var id = $(dt).attr('attr-id');
         var form_id = "product-feature-form-"+ id;
+        var table_id = "table-product-feature-"+ id;
+        var btn_add = "btn-add-feature-"+ id;
         $('form[id="'+ form_id +'"]').toggle();
+        $('div.'+ table_id).toggle();
+        $('a.'+ btn_add).toggle();
 
         return false;
     }
