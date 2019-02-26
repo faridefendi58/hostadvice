@@ -32,10 +32,10 @@
                         <tr>
                             <td>{{ product_data.title }}</td>
                             {% if 'space' in cat_configs.features %}
-                                <td>{{ product_data.space }}GB</td>
+                                <td>{% if product_data.space %}{{ product_data.space }}GB{% else %}Unlimited{% endif %}</td>
                             {% endif %}
                             {% if 'bandwidth' in cat_configs.features %}
-                                <td>{{ product_data.bandwidth }}GB</td>
+                                <td>{% if product_data.bandwidth %}{{ product_data.bandwidth }}GB{% else %}Unlimited{% endif %}</td>
                             {% endif %}
                             {% if 'panel' in cat_configs.features %}
                                 <td>{{ product_data.panel }}</td>
@@ -56,12 +56,12 @@
                                 <td>{{ product_data.os }}</td>
                             {% endif %}
                             <td>{{ product_data.score }}</td>
-                            <td>{% if product_data.status > 0 %}Enabled{% else %}Disabled{% endif %}</td>
+                            <td>{% if product_data.enabled > 0 %}Enabled{% else %}Disabled{% endif %}</td>
                             <td>
                                 <a href="#" onclick="return updateProductFeature(this);" rel-id="{{ product_data.id }}">
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a href="{{ 'hosting/companies/delete-product-feature' | link }}/{{ product_data.id }}" onclick="return hapusFitur(this);">
+                                <a href="{{ 'hosting/companies/delete-product-feature' | link }}/{{ product_data.id }}" onclick="return hapusProductFitur(this);">
                                     <i class="fa fa-trash-o"></i>
                                 </a>
                             </td>
@@ -241,6 +241,24 @@
         var form_id = "product-feature-form-"+ id;
         $('form[id="'+ form_id +'"]').toggle();
 
+        return false;
+    }
+
+    function hapusProductFitur(dt) {
+        if (confirm('Anda yakin ingin menghapus item ini ?')) {
+            var $this =  $(dt);
+            var url = $this.attr('href');
+            $.ajax({
+                'url': url,
+                'type':'post',
+                'success': function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        $this.parent().parent().remove();
+                    }
+                }
+            });
+        }
         return false;
     }
 </script>

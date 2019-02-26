@@ -29,6 +29,8 @@ class CompaniesController extends BaseController
         $app->map(['POST'], '/delete-review/[{id}]', [$this, 'delete_review']);
         $app->map(['POST'], '/check-reviewer', [$this, 'check_reviewer']);
         $app->map(['POST'], '/create-product-feature/[{id}]', [$this, 'create_product_feature']);
+        $app->map(['GET','POST'], '/update-product-feature/[{id}]', [$this, 'update_product_feature']);
+        $app->map(['POST'], '/delete-product-feature/[{id}]', [$this, 'delete_product_feature']);
     }
 
     public function accessRules()
@@ -40,7 +42,7 @@ class CompaniesController extends BaseController
                     'create-plan', 'update-plan', 'delete-plan',
                     'create-feature', 'update-feature', 'delete-feature',
                     'create-review', 'update-review', 'delete-review',
-                    'create-product-feature'
+                    'create-product-feature', 'update-product-feature', 'delete-product-feature'
                     ],
                 'users'=> ['@'],
             ],
@@ -843,6 +845,52 @@ class CompaniesController extends BaseController
             }
         } else {
             return $response->withJson(['status'=>'failed', 'messsage'=>'Tidak berhasil menyimpan data.'], 201);
+        }
+    }
+
+    public function update_product_feature($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        if (!isset($args['id'])) {
+            return false;
+        }
+    }
+
+    public function delete_product_feature($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response, $args);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if(!$isAllowed){
+            return $this->notAllowedAction();
+        }
+
+        if (!isset($args['id'])) {
+            return false;
+        }
+
+        $model = \ExtensionsModel\HostingCompanyProductModel::model()->findByPk($args['id']);
+        $delete = \ExtensionsModel\HostingCompanyProductModel::model()->delete($model);
+        if ($delete) {
+            return $response->withJson(
+                [
+                    'status' => 'success',
+                    'message' => 'Data berhasil dihapus.',
+                ], 201);
+        } else {
+            return $response->withJson(
+                [
+                    'status' => 'failed',
+                    'message' => 'Data gagal dihapus.',
+                ], 201);
         }
     }
 }
