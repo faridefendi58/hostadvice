@@ -119,4 +119,42 @@ class HostingCompanyProductModel extends \Model\BaseModel
 
         return $rows;
     }
+
+    public function getStartingPrices($data = array())
+    {
+        $sql = 'SELECT MIN(t.price_range_from) AS price_from, 
+            MIN(t.price_range_to) AS price_to 
+            FROM {tablePrefix}ext_hosting_company_product t 
+            WHERE t.enabled = 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (isset($data['company_id'])) {
+                $sql .= ' AND t.company_id=:company_id';
+                $params['company_id'] = $data['company_id'];
+            }
+
+            if (isset($data['category_id'])) {
+                $sql .= ' AND t.category_id=:category_id';
+                $params['category_id'] = $data['category_id'];
+            }
+        }
+
+        $sql .= ' GROUP BY t.category_id ORDER BY t.price_range_from DESC';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+
+        $items = [];
+        if (count($rows) > 0) {
+            foreach ($rows as $i => $row) {
+                $items[] = $row;
+            }
+
+            return $items;
+        }
+
+        return $rows;
+    }
 }
