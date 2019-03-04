@@ -157,4 +157,16 @@ class HostingCompanyProductModel extends \Model\BaseModel
 
         return $rows;
     }
+
+    public function getOptions($data) {
+        $datas = self::getData($data);
+        $items = [];
+        if (is_array($datas) && count($datas) > 0) {
+            foreach ($datas as $i => $data) {
+                $items[$data['category_id']][] = $data;
+            }
+        }
+
+        return $items;
+    }
 }

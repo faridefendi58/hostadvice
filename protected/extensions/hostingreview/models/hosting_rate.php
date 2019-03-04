@@ -41,6 +41,14 @@ class HostingRateModel extends \Model\BaseModel
 
         $params = [];
         if (is_array($data)) {
+            if (isset($data['review_id'])) {
+                $sql .= ' AND t.review_id=:review_id';
+                $params['review_id'] = $data['review_id'];
+            }
+            if (isset($data['reviewer_id'])) {
+                $sql .= ' AND r.reviewer_id=:reviewer_id';
+                $params['reviewer_id'] = $data['reviewer_id'];
+            }
         }
 
         $sql .= ' ORDER BY t.created_at DESC';
@@ -69,5 +77,15 @@ class HostingRateModel extends \Model\BaseModel
         $row = \Model\R::getRow( $sql, ['id'=>$id] );
 
         return $row;
+    }
+
+    public function getRateByReview($data) {
+        $datas = self::getData($data);
+        $items = [];
+        foreach ($datas as $i => $dt) {
+            $items[$dt['category_id']] = [ 'id' => $dt['id'], 'value' => (int)$dt['value'] ];
+        }
+
+        return $items;
     }
 }
