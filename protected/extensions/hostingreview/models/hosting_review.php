@@ -36,9 +36,12 @@ class HostingReviewModel extends \Model\BaseModel
      */
     public function getData($data = null)
     {
-        $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email, r.image  
+        $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email, r.image, 
+          p.title AS product_name, c.title AS product_category_name, c.slug AS product_category_slug  
             FROM {tablePrefix}ext_hosting_review t 
             LEFT JOIN {tablePrefix}ext_hosting_reviewer r ON r.id = t.reviewer_id 
+            LEFT JOIN {tablePrefix}ext_hosting_company_product p ON p.id = t.product_id 
+            LEFT JOIN {tablePrefix}ext_hosting_product_category c ON c.id = p.category_id 
             WHERE 1';
 
         $sql .= ' AND t.status=:status';

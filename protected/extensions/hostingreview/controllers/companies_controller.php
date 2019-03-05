@@ -84,6 +84,8 @@ class CompaniesController extends BaseController
         if (isset($_POST['HostingCompany'])){
             $model = new \ExtensionsModel\HostingCompanyModel('create');
             $model->title = $_POST['HostingCompany']['title'];
+            $post_model = new \ExtensionsModel\PostModel();
+            $model->slug = $post_model->createSlug($model->title);
             $model->description = $_POST['HostingCompany']['description'];
             $model->address = $_POST['HostingCompany']['address'];
             $model->phone = $_POST['HostingCompany']['phone'];
@@ -169,6 +171,8 @@ class CompaniesController extends BaseController
 
         if (isset($_POST['HostingCompany'])){
             $model->title = $_POST['HostingCompany']['title'];
+            $post_model = new \ExtensionsModel\PostModel();
+            $model->slug = $post_model->createSlug($model->title);
             $model->description = $_POST['HostingCompany']['description'];
             $model->address = $_POST['HostingCompany']['address'];
             $model->phone = $_POST['HostingCompany']['phone'];
