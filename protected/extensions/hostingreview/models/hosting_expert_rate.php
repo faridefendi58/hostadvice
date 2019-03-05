@@ -33,7 +33,7 @@ class HostingExpertRateModel extends \Model\BaseModel
      */
     public function getData($data = null)
     {
-        $sql = 'SELECT t.*, r.content, c.title AS category_name   
+        $sql = 'SELECT t.*, c.title AS category_name   
             FROM {tablePrefix}ext_hosting_expert_rate t 
             LEFT JOIN {tablePrefix}ext_hosting_expert_review r ON r.id = t.expert_review_id
             LEFT JOIN {tablePrefix}ext_hosting_rate_category c ON c.id = t.category_id

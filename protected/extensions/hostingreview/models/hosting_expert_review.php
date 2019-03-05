@@ -166,4 +166,37 @@ class HostingExpertReviewModel extends \Model\BaseModel
 
         return $rows;
     }
+
+    public function getContents($data = null)
+    {
+        $sql = 'SELECT t.hosting_company_id, t.rate, t.expert_id, c.id AS content_id, c.title, c.content, c.segment_id    
+            FROM {tablePrefix}ext_hosting_expert_review t 
+            RIGHT JOIN {tablePrefix}ext_hosting_expert_review_content c ON c.expert_review_id = t.id 
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (isset($data['hosting_company_id'])) {
+                $sql .= ' AND t.hosting_company_id=:hosting_company_id';
+                $params['hosting_company_id'] = $data['hosting_company_id'];
+            }
+            if (isset($data['expert_id'])) {
+                $sql .= ' AND t.expert_id=:expert_id';
+                $params['expert_id'] = $data['expert_id'];
+            }
+        }
+
+        $sql .= ' ORDER BY t.created_at DESC';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+
+        $items = [];
+        foreach ($rows as $i => $row) {
+            $items[$row['segment_id']] = $row;
+        }
+
+        return $items;
+    }
 }

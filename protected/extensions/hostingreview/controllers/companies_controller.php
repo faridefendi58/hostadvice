@@ -32,6 +32,10 @@ class CompaniesController extends BaseController
         $app->map(['POST'], '/create-product-feature/[{id}]', [$this, 'create_product_feature']);
         $app->map(['GET','POST'], '/update-product-feature/[{id}]', [$this, 'update_product_feature']);
         $app->map(['POST'], '/delete-product-feature/[{id}]', [$this, 'delete_product_feature']);
+        $app->map(['POST'], '/create-expert-review/[{id}]', [$this, 'create_expert_review']);
+        $app->map(['POST'], '/update-expert-review/[{id}]', [$this, 'update_expert_review']);
+        $app->map(['GET','POST'], '/update-expert-review-dialog/[{id}]', [$this, 'update_expert_review_dialog']);
+        $app->map(['POST'], '/delete-expert-review/[{id}]', [$this, 'delete_expert_review']);
     }
 
     public function accessRules()
@@ -43,7 +47,8 @@ class CompaniesController extends BaseController
                     'create-plan', 'update-plan', 'delete-plan',
                     'create-feature', 'update-feature', 'delete-feature',
                     'create-review', 'update-review', 'delete-review', 'update-review-dialog',
-                    'create-product-feature', 'update-product-feature', 'delete-product-feature'
+                    'create-product-feature', 'update-product-feature', 'delete-product-feature',
+                    'create-expert-review', 'update-expert-review', 'update-expert-review-dialog', 'delete-expert-review'
                     ],
                 'users'=> ['@'],
             ],
@@ -1115,5 +1120,346 @@ class CompaniesController extends BaseController
             'data' => $data,
             'rdata' => $rdata
         ]);
+    }
+
+    public function create_expert_review($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        if (!isset($args['id'])) {
+            return false;
+        }
+
+        $model = new \ExtensionsModel\HostingExpertReviewModel();
+        if (isset($_POST['HostingExpertReview'])) {
+            // avoid double execution
+            $current_time = time();
+            if(isset($_SESSION['HostingExpertReview']) && !empty($_SESSION['HostingExpertReview'])) {
+                $selisih = $current_time - $_SESSION['HostingExpertReview'];
+                if ($selisih <= 10) {
+                    return $response->withJson(
+                        [
+                            'status' => 'success',
+                            'message' => 'Data berhasil disimpan.',
+                        ], 201);
+                } else {
+                    $_SESSION['HostingExpertReview'] = $current_time;
+                }
+            } else {
+                $_SESSION['HostingExpertReview'] = $current_time;
+            }
+
+            $new_reviewer = false;
+            if (isset($_POST['HostingExpertReview']['reviewer_name'])) {
+                $new_reviewer = true;
+            }
+            if (!empty($_POST['HostingExpertReview']['expert_id'])) {
+                $model->expert_id = $_POST['HostingExpertReview']['expert_id'];
+                $new_reviewer = false;
+            }
+            if (!empty($_POST['HostingExpertReview']['rate'])) {
+                $a = array_filter($_POST['HostingExpertReview']['rate']);
+                $average = array_sum($a)/count($a);
+                $model->rate = $average;
+            }
+            $model->hosting_company_id = $args['id'];
+            $model->status = \ExtensionsModel\HostingReviewModel::STATUS_PUBLISHED;
+            $model->created_at = date("Y-m-d H:i:s");
+            $model->updated_at = date("Y-m-d H:i:s");
+            try {
+                $save = \ExtensionsModel\HostingExpertReviewModel::model()->save(@$model);
+            } catch (\Exception $e) {
+                var_dump($e->getMessage()); exit;
+            }
+
+            if ($save) {
+                // create content
+                if (isset($_POST['HostingExpertReview']['title'])) {
+                    foreach ($_POST['HostingExpertReview']['title'] as $segment_id => $title) {
+                        $model5 = new \ExtensionsModel\HostingExpertReviewContentModel();
+                        $model5->expert_review_id = $model->id;
+                        $model5->segment_id = $segment_id;
+                        $model5->title = $title;
+                        $model5->content = $_POST['HostingExpertReview']['content'][$segment_id];
+                        $model5->created_at = date("Y-m-d H:i:s");
+                        $model5->updated_at = date("Y-m-d H:i:s");
+                        $save5 = \ExtensionsModel\HostingExpertReviewContentModel::model()->save($model5);
+                    }
+                }
+                // create new feature if any
+                $reviewer_id = 0;
+                if ($new_reviewer) {
+                    $check_data = \ExtensionsModel\HostingExpertModel::model()->findByAttributes(['email' => $_POST['HostingExpertReview']['reviewer_email']]);
+                    if ($check_data instanceof \RedBeanPHP\OODBBean) {
+                        $model3 = \ExtensionsModel\HostingExpertReviewModel::model()->findByPk($model->id);
+                        $model3->expert_id = $check_data->id;
+                        $model3->updated_at = date("Y-m-d H:i:s");
+                        $update = \ExtensionsModel\HostingExpertReviewModel::model()->update($model3);
+
+                        $reviewer_id = $check_data->id;
+                    } else {
+                        // save image if any
+                        $uploadfile = null;
+                        if (isset($_FILES['HostingExpertReview'])) {
+                            $path_info = pathinfo($_FILES['HostingExpertReview']['name']['reviewer_image']);
+                            if (in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                                //echo json_encode(['status'=>'failed','message'=>'Allowed file type are jpg, png']); exit;
+                                $upload_folder = 'uploads/images/reviews';
+                                $file_name = time().'.'.$path_info['extension'];
+                                $uploadfile = $upload_folder . '/' . $file_name;
+                                try {
+                                    $upload = move_uploaded_file($_FILES['HostingExpertReview']['tmp_name']['reviewer_image'], $uploadfile);
+                                } catch (\Exception $e) {}
+                            }
+                        }
+
+                        $model2 = new \ExtensionsModel\HostingExpertModel();
+                        $model2->name = $_POST['HostingExpertReview']['reviewer_name'];
+                        $model2->email = $_POST['HostingExpertReview']['reviewer_email'];
+                        if (!empty($uploadfile)) {
+                            $model2->image = $uploadfile;
+                        }
+                        $model2->created_at = date("Y-m-d H:i:s");
+                        $model2->updated_at = date("Y-m-d H:i:s");
+                        try {
+                            $save2 = \ExtensionsModel\HostingExpertModel::model()->save(@$model2);
+                            if ($save2) {
+                                $model3 = \ExtensionsModel\HostingExpertReviewModel::model()->findByPk($model->id);
+                                $model3->expert_id = $model2->id;
+                                $model3->updated_at = date("Y-m-d H:i:s");
+                                $update = \ExtensionsModel\HostingExpertReviewModel::model()->update($model3);
+
+                                $reviewer_id = $model2->id;
+                            }
+                        } catch (\Exception $e) {
+                            var_dump($e->getMessage()); exit;
+                        }
+                    }
+                }
+
+                // save the rate
+                if (!empty($_POST['HostingExpertReview']['rate']) && is_array($_POST['HostingExpertReview']['rate'])) {
+                    foreach ($_POST['HostingExpertReview']['rate'] as $category_id => $rate_val) {
+                        $model4 = new \ExtensionsModel\HostingExpertRateModel();
+                        $model4->expert_review_id = $model->id;
+                        $model4->category_id = $category_id;
+                        $model4->value = $rate_val;
+                        $model4->created_at = date("Y-m-d H:i:s");
+                        $save3 = \ExtensionsModel\HostingExpertRateModel::model()->save($model4);
+                    }
+                }
+
+                return $response->withJson(
+                    [
+                        'status' => 'success',
+                        'message' => 'Data berhasil disimpan.',
+                    ], 201);
+            } else {
+                return $response->withJson(['status'=>'failed'], 201);
+            }
+        } else {
+            return $response->withJson(['status'=>'failed', 'messsage'=>'Tidak berhasil menyimpan data.'], 201);
+        }
+    }
+
+    public function update_expert_review($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        if (empty($args['id']))
+            return false;
+        $params = $request->getParams();
+        if (isset($params['id']) && isset($params['content'])) {
+            $model = \ExtensionsModel\HostingExpertReviewModel::model()->findByPk($params['id']);
+            if ($model instanceof \RedBeanPHP\OODBBean) {
+                $model->status = $params['status'];
+                $model->updated_at = date("Y-m-d H:i:s");
+                $update = \ExtensionsModel\HostingExpertReviewModel::model()->update($model);
+                if ($update) {
+                    return $response->withJson(
+                        [
+                            'status' => 'success',
+                            'message' => 'Data berhasil diubah.',
+                        ], 201);
+                }
+            }
+        }
+
+        return $response->withJson(
+            [
+                'status' => 'failed',
+                'message' => 'Data gagal diperbarui.',
+            ], 201);
+    }
+
+    public function update_expert_review_dialog($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        if (!isset($args['id'])) {
+            return false;
+        }
+
+        $params = $request->getParams();
+        $model = \ExtensionsModel\HostingExpertReviewModel::model()->findByPk($params['id']);
+
+        $rmodel = new \ExtensionsModel\HostingExpertReviewModel();
+        $data = $rmodel->getDetail($model->id);
+        $cdata = $rmodel->getContents(['hosting_company_id' => $args['id'], 'expert_id' => $model->expert_id]);
+
+        $rtmodel = new \ExtensionsModel\HostingExpertRateModel();
+        $rdata = $rtmodel->getRateByReview(['expert_review_id' => $model->id, 'expert_id' => $model->expert_id]);
+
+        if (isset($_POST['HostingExpertReview'])) {
+            // avoid double execution
+            $current_time = time();
+            if(isset($_SESSION['HostingExpertReview']) && !empty($_SESSION['HostingExpertReview'])) {
+                $selisih = $current_time - $_SESSION['HostingExpertReview'];
+                if ($selisih <= 10) {
+                    return $response->withJson(
+                        [
+                            'status' => 'success',
+                            'message' => 'Data berhasil disimpan.',
+                        ], 201);
+                } else {
+                    $_SESSION['HostingExpertReview'] = $current_time;
+                }
+            } else {
+                $_SESSION['HostingExpertReview'] = $current_time;
+            }
+
+
+            $model->expert_id = $_POST['HostingExpertReview']['expert_id'];
+            if (!empty($_POST['HostingExpertReview']['rate'])) {
+                $a = array_filter($_POST['HostingExpertReview']['rate']);
+                $average = array_sum($a)/count($a);
+                $model->rate = $average;
+            }
+            if (isset($_POST['HostingExpertReview']['status'])) {
+                $model->status = $params['status'];
+            }
+            $model->updated_at = date("Y-m-d H:i:s");
+            try {
+                $update = \ExtensionsModel\HostingExpertReviewModel::model()->update($model);
+            } catch (\Exception $e) {
+                var_dump($e->getMessage()); exit;
+            }
+
+            if ($update) {
+                if (!empty($_POST['HostingExpertReview']['rate']) && is_array($_POST['HostingExpertReview']['rate'])) {
+                    foreach ($_POST['HostingExpertReview']['rate'] as $category_id => $rate_val) {
+                        $rate_new_record = true;
+                        $model4 = new \ExtensionsModel\HostingExpertRateModel();
+                        if (!empty($rdata[$category_id])) {
+                            $model5 = \ExtensionsModel\HostingExpertRateModel::model()->findByPk($rdata[$category_id]['id']);
+                            if ($model5 instanceof \RedBeanPHP\OODBBean) {
+                                $rate_new_record = false;
+                                $model4 = $model5;
+                            }
+                        }
+                        $model4->expert_review_id = $model->id;
+                        $model4->category_id = $category_id;
+                        $model4->value = $rate_val;
+                        $model4->created_at = date("Y-m-d H:i:s");
+                        if ($rate_new_record) {
+                            $save3 = \ExtensionsModel\HostingExpertRateModel::model()->save($model4);
+                        } else {
+                            $update3 = \ExtensionsModel\HostingExpertRateModel::model()->update($model4);
+                        }
+                    }
+                }
+
+                // update review
+                if (isset($_POST['HostingExpertReview']['title'])) {
+                    foreach ($_POST['HostingExpertReview']['title'] as $segment_id => $title) {
+                        $content_new_record = true;
+                        if (!empty($_POST['HostingExpertReview']['id'][$segment_id])) {
+                            $model5 = \ExtensionsModel\HostingExpertReviewContentModel::model()->findByPk($_POST['HostingExpertReview']['id'][$segment_id]);
+                            $content_new_record = false;
+                        } else {
+                            $model5 = new \ExtensionsModel\HostingExpertReviewContentModel();
+                        }
+                        $model5->expert_review_id = $model->id;
+                        $model5->segment_id = $segment_id;
+                        $model5->title = $title;
+                        $model5->content = $_POST['HostingExpertReview']['content'][$segment_id];
+                        if ($content_new_record) {
+                            $model5->created_at = date("Y-m-d H:i:s");
+                            $save5 = \ExtensionsModel\HostingExpertReviewContentModel::model()->save($model5);
+                        } else {
+                            $model5->updated_at = date("Y-m-d H:i:s");
+                            $save5 = \ExtensionsModel\HostingExpertReviewContentModel::model()->update($model5);
+                        }
+                    }
+                }
+
+                return $response->withJson(
+                    [
+                        'status' => 'success',
+                        'message' => 'Data berhasil disimpan.',
+                    ], 201);
+            } else {
+                return $response->withJson(['status'=>'failed'], 201);
+            }
+        }
+
+        return $this->_container->module->render($response, 'hostings/_form_expert_review_update.html', [
+            'model' => $model,
+            'hosting_company_id' => $args['id'],
+            'data' => $data,
+            'rdata' => $rdata,
+            'cdata' => $cdata
+        ]);
+    }
+
+    public function delete_expert_review($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response, $args);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if(!$isAllowed){
+            return $this->notAllowedAction();
+        }
+
+        if (!isset($args['id'])) {
+            return false;
+        }
+
+        $model = \ExtensionsModel\HostingExpertReviewModel::model()->findByPk($args['id']);
+        $delete = \ExtensionsModel\HostingExpertReviewModel::model()->delete($model);
+        if ($delete) {
+            $delete2 = \ExtensionsModel\HostingExpertRateModel::model()->deleteAllByAttributes(['expert_review_id' => $args['id']]);
+            $delete3 = \ExtensionsModel\HostingExpertReviewContentModel::model()->deleteAllByAttributes(['expert_review_id' => $args['id']]);
+            return $response->withJson(
+                [
+                    'status' => 'success',
+                    'message' => 'Data berhasil dihapus.',
+                ], 201);
+        } else {
+            return $response->withJson(
+                [
+                    'status' => 'failed',
+                    'message' => 'Data gagal dihapus.',
+                ], 201);
+        }
     }
 }

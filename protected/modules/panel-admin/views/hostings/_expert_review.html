@@ -1,0 +1,128 @@
+{% set reviews = App.call.model("\\ExtensionsModel\\HostingExpertReviewModel", 'getData', {'hosting_company_id':model.id, 'status':'published'}) %}
+<div class="row">
+    <div class="col-md-7">
+        <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+            <div class="alert alert-success" id="alert-update-expert-review" style="display: none;"></div>
+            <table class="table table-responsive dataTable">
+                <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Rate</th>
+                    <th>Status</th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i, review in reviews %}
+                <tr>
+                    <td>
+                        <a href="{{ 'hosting/reviewers/update' | link }}/{{ review.reviewer_id }}" target="_blank">{{ review.expert_name }}</a>
+                    </td>
+                    <td>
+                        {{ review.rate }}
+                    </td>
+                    <td>
+                        {% set status_list = App.call.model("\\ExtensionsModel\\HostingReviewModel", 'getStatuses', {}) %}
+                        <select name="HostingReview[status][{{ review.id }}]" class="form-control f_status">
+                            {% for is, stts in status_list %}
+                            <option value="{{ is }}" {% if is == review.status %}selected="selected"{% endif %}>{{ stts }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <a href="#" onclick="return updateExpertReview(this);" rel-id="{{ review.id }}">
+                            <i class="fa fa-refresh"></i>
+                        </a>
+                        <a href="#" onclick="return showUpdateDialog(this);" rel-id="{{ review.id }}">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                        <a href="{{ 'hosting/companies/delete-expert-review' | link }}/{{ review.id }}" onclick="return hapusExpertReview(this);">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-5">
+        {% include 'hostings/_form_expert_review.html' with {'hosting_company_id':model.id} %}
+    </div>
+</div>
+<button class="hide btn-modal-rev-expert" data-toggle="modal" data-target="#bs_modal_regular_rev_exp">Regular modal</button>
+<div class="modal fade" id="bs_modal_regular_rev_exp">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">Update Review <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button></div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function hapusExpertReview(dt) {
+        if (confirm('Anda yakin ingin menghapus item ini ?')) {
+            var $this =  $(dt);
+            var url = $this.attr('href');
+            $.ajax({
+                'url': url,
+                'type':'post',
+                'success': function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        $this.parent().parent().remove();
+                    }
+                }
+            });
+        }
+        return false;
+    }
+    function updateExpertReview(dt) {
+        //if (confirm('Anda yakin ingin memperbarui data item ini ?')) {
+        var $this =  $(dt);
+        var url = "{{ 'hosting/companies/update-review' | link }}/"+ $this.attr('rel-id');
+        var f_content = $this.parent().parent().find('.f_content').val();
+        var f_status = $this.parent().parent().find('.f_status').val();
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data':{'id':$this.attr('rel-id'),'content':f_content,'status':f_status},
+            'dataType':'json',
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    $('#alert-update-expert-review').html(data.message);
+                    $('#alert-update-expert-review').show();
+                    setTimeout(function () {
+                        $('#alert-update-expert-review').hide();
+                    }, 2000);
+                } else {
+                    $('#alert-update-expert-review').hide();
+                }
+            }
+        });
+        //}
+        return false;
+    }
+
+    function showUpdateDialog(dt) {
+        var id = $(dt).attr('rel-id');
+        $.ajax({
+            'url': "{{ 'hosting/companies/update-expert-review-dialog' | link }}/{{ model.id }}?id="+ id,
+            'type':'get',
+            'async': false,
+            'success': function(data) {
+                $('#bs_modal_regular_rev_exp').find('.modal-body').html(data);
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
+        });
+        $('button.btn-modal-rev-expert').trigger("click");
+
+        return false;
+    }
+</script>

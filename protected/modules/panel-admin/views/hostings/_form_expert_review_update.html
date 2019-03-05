@@ -1,0 +1,188 @@
+<form method="post" id="expert-review-form-update"
+      action="{{ 'hosting/companies/update-expert-review-dialog' | link }}/{{ hosting_company_id }}?id={{ data.id }}" enctype="multipart/form-data">
+    <div class="alert alert-success" style="display: none;"></div>
+    <div class="alert alert-warning" style="display: none;"></div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label class="control-label">Pilih Expert Reviewer</label>
+            {% set revrs = App.call.model("\\ExtensionsModel\\HostingExpertModel", 'getData', {}) %}
+            <select id="s2_basic" name="HostingExpertReview[expert_id]" class="form-control reviewer-list" onchange="chooseReviewer(this);">
+                <option value="-">Pilih</option>
+                {% for fi,revr in revrs %}
+                <option value="{{ revr.id }}" attr-title="{{ revr.name }}"
+                        attr-email="{{ revr.email }}" {% if data.expert_id and revr.id == data.expert_id %}selected="selected"{% endif %}>{{ revr.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if not data %}
+        <div class="col-md-6">
+            <label class="control-label">Nama Expert Reviewer</label>
+            <input name="HostingExpertReview[reviewer_name]" type="text" class="form-control reviewer-name" value="{{ data.reviewer_name }}">
+        </div>
+        {% endif %}
+        <div class="clearfix mb10"></div>
+    </div>
+    {% if not data %}
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-4">
+                <label class="control-label">Email</label>
+                <input name="HostingExpertReview[reviewer_email]" type="text" class="form-control reviewer-email" value="{{ data.reviewer_email }}" onchange="checkAccount(this);">
+            </div>
+            <div class="col-md-8">
+                <label class="control-label">Image</label>
+
+                <div class="fileupload fileupload-new" data-provides="fileupload">
+                    <div class="input-append">
+                        <div class="uneditable-input">
+                            <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                        </div>
+                        <span class="btn btn-default btn-file">
+                            <span class="fileupload-new">Select file</span>
+                            <span class="fileupload-exists">Change</span>
+                            <input type="file" name="HostingExpertReview[reviewer_image]" class="reviewer-image"/>
+                        </span>
+                        <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix mb15"></div>
+    </div>
+    {% endif %}
+    <div class="form-group">
+        <div class="row">
+            {% set segments = App.call.model("\\ExtensionsModel\\HostingExpertReviewSegmentModel", 'getData', {}) %}
+            {% for is, segment in segments %}
+            {% set segment_id = segment.id %}
+            <div class="col-md-12">
+                <label class="control-label">{{ segment.title }} <span class="red">*</span></label>
+                <input type="text" name="HostingExpertReview[title][{{ segment.id }}]" class="form-control required" value="{{ cdata[segment_id].title }}" placeholder="Berikan judul atau kesimpulan singkat" required />
+            </div>
+            <div class="col-md-12 mb20">
+                <textarea name="HostingExpertReview[content][{{ segment.id }}]" class="form-control required" rows="1" placeholder="Tuliskan {{ segment.description }}" required>{{ cdata[segment_id].content }}</textarea>
+            </div>
+            {% if cdata %}
+            <input type="hidden" name="HostingExpertReview[id][{{ segment.id }}]" value="{{ cdata[segment_id].content_id }}">
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-6">
+                <label class="control-label">Rate</label>
+                {% set rates = [1,2,3,4,5,6,7,8,9,10] %}
+                {% set categories = App.call.model("\\ExtensionsModel\\HostingRateCategoryModel", 'getData', {}) %}
+                {% for ci, category in categories %}
+                <div class="input-group mb10">
+                    {% set cat_id = category.id %}
+                    <span class="input-group-addon">{{ category.title }}</span>
+                    <select name="HostingExpertReview[rate][{{ category.id }}]" class="form-control required">
+                        {% for i,rate in rates %}
+                        <option value="{{ rate }}" {% if rdata and rdata[cat_id].value == rate %}selected="selected"{% endif %}>{{ rate }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="HostingExpertReview[hosting_company_id]" value="{{ hosting_company_id }}">
+    <input type="hidden" name="HostingExpertReview[review_expert_id]" value="{{ data.expert_id }}" id="hosting_expert_id">
+    <div class="form-group">
+        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveExpertReview(this);">
+    </div>
+</form>
+
+{% block endbodyjs %}
+<script type="text/javascript">
+    function saveExpertReview(dt) {
+        var validate = jb_validation.validate($('form[id="expert-review-form-update"]'));
+        if (!validate) {
+            return false;
+        }
+
+        var formData = new FormData($('form[id="expert-review-form-update"]')[0]);
+        var url = $(dt).parent().parent().attr('action');
+
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data': formData,
+            'dataType': 'json',
+            'async': false,
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    var alert_success = $('#expert-review-form-update').find('.alert-success');
+                    var alert_warning = $('#expert-review-form-update').find('.alert-warning');
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    alert_warning.hide();
+                    setTimeout(function () {
+                        window.location.reload(true);
+                    }, 5000);
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
+        });
+
+        return false;
+    }
+
+    function chooseReviewer(dt) {
+        var opt = $(dt).find('option[value="'+ $(dt).val() +'"]');
+        $('#hosting_expert_id').val($(dt).val());
+        $('.reviewer-name').attr('placeholder', opt.text());
+        $('.reviewer-email').attr('placeholder', opt.attr('attr-email'));
+        $('#hosting_expert_id').val($(dt).val());
+        return true;
+    }
+
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    function isEmailExist(email) {
+        $.ajax({
+            'url': "{{ 'hosting/companies/check-reviewer' | link }}",
+            'type':'post',
+            'data': {'email':email},
+            'dataType': 'json',
+            'async': false,
+            'success': function(data) {
+                var msg = "<span class=\"help-block\">"+ data.message +"</span>";
+                if (data.status == 'success') {
+                    $('.reviewer-email').parent().addClass('has-error').append(msg);
+                    return true;
+                } else {
+                    $('.reviewer-email').parent().removeClass('has-error');
+                    $('.reviewer-email').parent().find('.help-block').remove();
+                    return false;
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+        });
+        return false;
+    }
+
+
+    function checkAccount(dt) {
+        if ($('select.reviewer-list').val() == '-' || $('#hosting_expert_id').val().length == 0) {
+            isEmailExist($(dt).val());
+        }
+
+        return false;
+    }
+</script>
+{% endblock %}

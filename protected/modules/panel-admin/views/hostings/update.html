@@ -38,6 +38,7 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 								<li class="hidden"><a data-toggle="tab" href="#paket-hosting">Paket Hosting</a></li>
 								<li><a data-toggle="tab" href="#fitur">Fitur Tambahan</a></li>
 								<li><a data-toggle="tab" href="#review">Review</a></li>
+								<li><a data-toggle="tab" href="#expert-review">Expert Review</a></li>
 							</ul>
 							<div class="tab-content" id="tabs_content_a">
 								<div id="detail" class="tab-pane fade in active">
@@ -98,6 +99,9 @@ Detail Layanan - {{ model.title }} - {{ App.params.site_name }}
 								</div>
 								<div id="review" class="tab-pane fade">
 									{% include 'hostings/_review.html' with {'model':model, 'reviews':reviews} %}
+								</div>
+								<div id="expert-review" class="tab-pane fade">
+									{% include 'hostings/_expert_review.html' with {'model':model} %}
 								</div>
 							</div>
 
