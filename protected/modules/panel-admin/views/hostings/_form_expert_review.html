@@ -61,7 +61,7 @@
                 <input type="text" name="HostingExpertReview[title][{{ segment.id }}]" class="form-control required" value="{{ cdata[segment_id].title }}" placeholder="Berikan judul atau kesimpulan singkat" required />
             </div>
             <div class="col-md-12 mb20">
-                <textarea name="HostingExpertReview[content][{{ segment.id }}]" class="form-control required" rows="1" placeholder="Tuliskan {{ segment.description }}" required>{{ cdata[segment_id].content }}</textarea>
+                <textarea name="HostingExpertReview[content][{{ segment.id }}]" class="form-control required" rows="2" placeholder="Tuliskan {{ segment.description }}" required>{{ cdata[segment_id].content }}</textarea>
             </div>
             {% if cdata %}
                 <input type="hidden" name="HostingExpertReview[id][{{ segment.id }}]" value="{{ cdata[segment_id].content_id }}">

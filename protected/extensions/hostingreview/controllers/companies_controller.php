@@ -1159,7 +1159,8 @@ class CompaniesController extends BaseController
             if (isset($_POST['HostingExpertReview']['reviewer_name'])) {
                 $new_reviewer = true;
             }
-            if (!empty($_POST['HostingExpertReview']['expert_id'])) {
+
+            if (!empty($_POST['HostingExpertReview']['expert_id']) && $_POST['HostingExpertReview']['expert_id'] != "-") {
                 $model->expert_id = $_POST['HostingExpertReview']['expert_id'];
                 $new_reviewer = false;
             }
