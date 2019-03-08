@@ -36,6 +36,7 @@ class CompaniesController extends BaseController
         $app->map(['POST'], '/update-expert-review/[{id}]', [$this, 'update_expert_review']);
         $app->map(['GET','POST'], '/update-expert-review-dialog/[{id}]', [$this, 'update_expert_review_dialog']);
         $app->map(['POST'], '/delete-expert-review/[{id}]', [$this, 'delete_expert_review']);
+        $app->map(['POST'], '/create-expert-reviewer', [$this, 'create_expert_reviewer']);
     }
 
     public function accessRules()
@@ -48,7 +49,8 @@ class CompaniesController extends BaseController
                     'create-feature', 'update-feature', 'delete-feature',
                     'create-review', 'update-review', 'delete-review', 'update-review-dialog',
                     'create-product-feature', 'update-product-feature', 'delete-product-feature',
-                    'create-expert-review', 'update-expert-review', 'update-expert-review-dialog', 'delete-expert-review'
+                    'create-expert-review', 'update-expert-review', 'update-expert-review-dialog', 'delete-expert-review',
+                    'create-expert-reviewer'
                     ],
                 'users'=> ['@'],
             ],
@@ -1282,7 +1284,7 @@ class CompaniesController extends BaseController
         if (empty($args['id']))
             return false;
         $params = $request->getParams();
-        if (isset($params['id']) && isset($params['content'])) {
+        if (isset($params['id']) && isset($params['status'])) {
             $model = \ExtensionsModel\HostingExpertReviewModel::model()->findByPk($params['id']);
             if ($model instanceof \RedBeanPHP\OODBBean) {
                 $model->status = $params['status'];
@@ -1461,6 +1463,90 @@ class CompaniesController extends BaseController
                     'status' => 'failed',
                     'message' => 'Data gagal dihapus.',
                 ], 201);
+        }
+    }
+
+    public function create_expert_reviewer($request, $response, $args) {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        $model = new \ExtensionsModel\HostingExpertModel();
+        if (isset($_POST['HostingExpert'])) {
+            // avoid double execution
+            $current_time = time();
+            if (isset($_SESSION['HostingExpert']) && !empty($_SESSION['HostingExpert'])) {
+                $selisih = $current_time - $_SESSION['HostingExpert'];
+                if ($selisih <= 10) {
+                    return $response->withJson(
+                        [
+                            'status' => 'success',
+                            'message' => 'Data berhasil disimpan.',
+                        ], 201);
+                } else {
+                    $_SESSION['HostingExpert'] = $current_time;
+                }
+            } else {
+                $_SESSION['HostingExpert'] = $current_time;
+            }
+
+            // check if email already exists
+            $check_model = \ExtensionsModel\HostingExpertModel::model()->findByAttributes(['email' => $_POST['HostingExpert']['email']]);
+            if ($check_model instanceof \RedBeanPHP\OODBBean) {
+                return $response->withJson(
+                    [
+                        'status' => 'failed',
+                        'message' => $check_model->email.' sudah pernah terdaftar.',
+                    ], 201);
+            }
+
+            $model->name = $_POST['HostingExpert']['name'];
+            $model->email = $_POST['HostingExpert']['email'];
+            $model->phone = $_POST['HostingExpert']['phone'];
+            $model->website = $_POST['HostingExpert']['website'];
+            $model->about = $_POST['HostingExpert']['about'];
+            $model->status = \ExtensionsModel\HostingExpertModel::STATUS_ACTIVE;
+            $model->created_at = date("Y-m-d H:i:s");
+            $model->updated_at = date("Y-m-d H:i:s");
+            try {
+                $save = \ExtensionsModel\HostingExpertModel::model()->save(@$model);
+            } catch (\Exception $e) {
+                var_dump($e->getMessage()); exit;
+            }
+
+            if ($save) {
+                // save image if any
+                $uploadfile = null;
+                if (isset($_FILES['HostingExpert'])) {
+                    $path_info = pathinfo($_FILES['HostingExpert']['name']['image']);
+                    if (in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                        $upload_folder = 'uploads/images/reviews';
+                        $file_name = time().'.'.$path_info['extension'];
+                        $uploadfile = $upload_folder . '/' . $file_name;
+                        try {
+                            $upload = move_uploaded_file($_FILES['HostingExpert']['tmp_name']['image'], $uploadfile);
+                        } catch (\Exception $e) {}
+                    }
+                }
+
+                if (!empty($uploadfile)) {
+                    $model2 = \ExtensionsModel\HostingExpertModel::model()->findByPk($model->id);
+                    $model2->image = $uploadfile;
+                    $model2->updated_at = date("Y-m-d H:i:s");
+                    $update = \ExtensionsModel\HostingExpertModel::model()->update($model2);
+                }
+
+                return $response->withJson(
+                    [
+                        'status' => 'success',
+                        'message' => 'Data berhasil disimpan.',
+                        'expert_id' => $model->id
+                    ], 201);
+            }
         }
     }
 }

@@ -1,0 +1,116 @@
+<form method="post" id="expert-reviewer-form"
+      action="{{ 'hosting/companies/create-expert-reviewer' | link }}" enctype="multipart/form-data">
+    <div class="alert alert-success" style="display: none;"></div>
+    <div class="alert alert-warning" style="display: none;"></div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label class="control-label">Nama <span class="red">*</span></label>
+            <input name="HostingExpert[name]" type="text" class="form-control required" value="{{ data.name }}">
+        </div>
+        <div class="col-md-6">
+            <label class="control-label">Nomor Telepon</label>
+            <input name="HostingExpert[phone]" type="text" class="form-control" value="{{ data.phone }}">
+        </div>
+        <div class="clearfix mb10"></div>
+    </div>
+    
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-4">
+                <label class="control-label">Email <span class="red">*</span></label>
+                <input name="HostingExpert[email]" type="text" class="form-control required" value="{{ data.email }}">
+            </div>
+            <div class="col-md-8">
+                <label class="control-label">Image <span class="red">*</span></label>
+
+                <div class="fileupload fileupload-new" data-provides="fileupload">
+                    <div class="input-append">
+                        <div class="uneditable-input">
+                            <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                        </div>
+                        <span class="btn btn-default btn-file">
+                            <span class="fileupload-new">Select file</span>
+                            <span class="fileupload-exists">Change</span>
+                            <input type="file" name="HostingExpert[image]" class="reviewer-image"/>
+                        </span>
+                        <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix mb15"></div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label class="control-label">Website <span class="red">*</span></label>
+            <input name="HostingExpert[website]" type="text" class="form-control required" value="{{ data.website }}">
+        </div>
+        <div class="col-md-6">
+            <label class="control-label">Profesi <span class="red">*</span></label>
+            <input name="HostingExpert[profession]" type="text" class="form-control required" value="{{ data.profession }}">
+        </div>
+        <div class="clearfix mb10"></div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-12">
+            <label class="control-label">Tentang Reviewer <span class="red">*</span></label>
+            <textarea name="HostingExpert[about]" class="form-control required" rows="2" placeholder="Berikan deskripsi singkat tentang reviewer.">{{ data.about }}</textarea>
+        </div>
+        <div class="clearfix mb10"></div>
+    </div>
+    
+    <div class="form-group">
+        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveExpertReviewer(this);">
+    </div>
+</form>
+
+{% block endbodyjs %}
+<script type="text/javascript">
+    function saveExpertReviewer(dt) {
+        var validate = jb_validation.validate($('form[id="expert-reviewer-form"]'));
+        if (!validate) {
+            return false;
+        }
+
+        var formData = new FormData($('form[id="expert-reviewer-form"]')[0]);
+        var url = $(dt).parent().parent().attr('action');
+
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data': formData,
+            'dataType': 'json',
+            'async': false,
+            'success': function(data) {
+                console.log(data);
+                var alert_success = $('#expert-reviewer-form').find('.alert-success');
+                var alert_warning = $('#expert-reviewer-form').find('.alert-warning');
+                if (data.status == 'success') {
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    alert_warning.hide();
+                    setTimeout(function () {
+                        var href = "{{ 'hosting/companies/update' | link }}/{{ hosting_company_id }}" + '?expert_id=' + data.expert_id + '#expert-review';
+                        window.location.href = href;
+                    }, 4000);
+                } else {
+                    alert_warning.html(data.message);
+                    alert_warning.show();
+                    alert_success.hide();
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
+        });
+
+        return false;
+    }
+</script>
+{% endblock %}

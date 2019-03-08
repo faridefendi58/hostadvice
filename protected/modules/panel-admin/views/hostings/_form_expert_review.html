@@ -15,15 +15,21 @@
             </select>
         </div>
         {% if not data %}
-        <div class="col-md-6">
+        <div class="col-md-6 hide">
             <label class="control-label">Nama Expert Reviewer</label>
             <input name="HostingExpertReview[reviewer_name]" type="text" class="form-control reviewer-name" value="{{ data.reviewer_name }}">
         </div>
         {% endif %}
+        <div class="col-md-6">
+            <label class="control-label">&nbsp;</label>
+            <a href="javascript:void(0);" class="btn btn-info" data-toggle="modal" data-target="#modal_add_expert">
+                <i class="fa fa-plus"></i> Tambah Expert Reviewer
+            </a>
+        </div>
         <div class="clearfix mb10"></div>
     </div>
     {% if not data %}
-    <div class="form-group">
+    <div class="form-group hide">
         <div class="row">
             <div class="col-md-4">
                 <label class="control-label">Email</label>
@@ -96,6 +102,14 @@
     </div>
 </form>
 
+<div class="modal fade" id="modal_add_expert">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">Tambah Expert Reviewer <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button></div>
+            <div class="modal-body">{% include 'hostings/_form_expert_reviewer.html' with {'hosting_company_id':hosting_company_id} %}</div>
+        </div>
+    </div>
+</div>
 {% block endbodyjs %}
 <script type="text/javascript">
     function saveExpertReview(dt) {
@@ -183,6 +197,28 @@
         }
 
         return false;
+    }
+
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+    };
+
+    var expert_id = getUrlParameter("expert_id");
+    if (typeof expert_id != undefined) {
+        setTimeout(function () {
+            $('select.reviewer-list').val(expert_id);
+        }, 3000);
     }
 </script>
 {% endblock %}

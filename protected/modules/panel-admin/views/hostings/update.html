@@ -174,6 +174,15 @@ $(function () {
             placeholder: "Select...",
         }).val(sel_val2).trigger("change");
     }
+
+    var current_url = window.location.href;
+    var kres = current_url.includes("#");
+	if (kres) {
+        var myarr = current_url.split("#");
+        if (myarr[1].length > 0) {
+            $('a[href="#'+ myarr[1] +'"]').trigger('click');
+		}
+	}
 });
 </script>
 {% endblock %}
