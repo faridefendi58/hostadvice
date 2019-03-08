@@ -30,6 +30,25 @@
                 <label class="control-label">Deskripsi</label>
                 <textarea name="HostingCompany[description]" class="form-control">{{ model.description }}</textarea>
             </div>
+
+            <div class="form-group">
+                <label class="control-label">Jenis Layanan <span class="red">*</span></label>
+                {% set p_categories = App.call.model("\\ExtensionsModel\\HostingProductCategoryModel", 'getData', {}) %}
+                <select name="HostingCompany[product_category_id][]" id="s1_ext_value" class="form-control" multiple>
+                    {% for ipc, p_category in p_categories %}
+                    <option value="{{ p_category.id }}" {% if configs.product_category_id[p_category.id] %}selected="selected"{% endif %}>{{ p_category.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Lokasi Server <span class="red">*</span></label>
+                {% set countries = App.call.model("\\Model\\CountryModel", 'getItems', {}) %}
+                <select name="HostingCompany[server_location][]" id="s2_ext_value" class="form-control" multiple>
+                    {% for ict, country in countries %}
+                    <option data-code="{{ country.code }}" value="{{ country.id }}" {% if configs.server_location[country.id] %}selected="selected"{% endif %}>{{ country.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="form-group">
                 <label>Status</label>
                 {% set status_list = {'enabled':'Enabled', 'disabled':'Disabled', 'hidden':'Hidden'} %}
@@ -64,26 +83,29 @@
                 <span class="help-block">Ukuran gambar ideal 250 x 63px</span>
             </div>
             <div class="form-group">
+                <label class="control-label">Homepage Screenshot</label>
+                {% if configs.homepage_screenshot %}
+                <img src="{{ configs.homepage_screenshot | link }}" class="img-responsive mb20" style="max-height:150px !important;"/>
+                {% endif %}
+                <div class="fileupload fileupload-new" data-provides="fileupload">
+                    <div class="input-append">
+                        <div class="uneditable-input">
+                            <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                        </div>
+                        <span class="btn btn-default btn-file">
+                            <span class="fileupload-new">Select file</span>
+                            <span class="fileupload-exists">Change</span>
+                            <input type="file" name="HostingCompany[homepage_screenshot]"/>
+                        </span>
+                        <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+                    </div>
+                </div>
+                <span class="help-block">Ukuran gambar ideal 380 x 380px</span>
+            </div>
+            <div class="form-group">
                 <label class="control-label">Rangking <span class="red">*</span></label>
                 <input name="HostingCompany[rangking]" type="text" class="form-control" value="{{ model.rangking | default(0) }}">
-            </div>
-            <div class="form-group">
-                <label class="control-label">Jenis Layanan <span class="red">*</span></label>
-                {% set p_categories = App.call.model("\\ExtensionsModel\\HostingProductCategoryModel", 'getData', {}) %}
-                <select name="HostingCompany[product_category_id][]" id="s1_ext_value" class="form-control" multiple>
-                    {% for ipc, p_category in p_categories %}
-                    <option value="{{ p_category.id }}" {% if configs.product_category_id[p_category.id] %}selected="selected"{% endif %}>{{ p_category.title }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="control-label">Lokasi Server <span class="red">*</span></label>
-                {% set countries = App.call.model("\\Model\\CountryModel", 'getItems', {}) %}
-                <select name="HostingCompany[server_location][]" id="s2_ext_value" class="form-control" multiple>
-                    {% for ict, country in countries %}
-                    <option data-code="{{ country.code }}" value="{{ country.id }}" {% if configs.server_location[country.id] %}selected="selected"{% endif %}>{{ country.title }}</option>
-                    {% endfor %}
-                </select>
             </div>
             <div class="form-group">
                 <label class="control-label">Alamat</label>

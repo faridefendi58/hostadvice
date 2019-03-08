@@ -216,6 +216,26 @@ class CompaniesController extends BaseController
                             }
                         } catch (\Exception $e) {}
                     }
+
+                    $path_info2 = pathinfo($_FILES['HostingCompany']['name']['homepage_screenshot']);
+                    if (in_array($path_info2['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                        $upload_folder = 'uploads/images/companies';
+                        $file_name = time().'.'.$path_info2['extension'];
+                        $uploadfile = $upload_folder . '/' . $file_name;
+                        try {
+                            $upload = move_uploaded_file($_FILES['HostingCompany']['tmp_name']['homepage_screenshot'], $uploadfile);
+                            if ($upload) {
+                                $umodel = \ExtensionsModel\HostingCompanyModel::model()->findByPk($model->id);
+                                $configs2 = json_decode($umodel->configs, true);
+                                $configs2['homepage_screenshot'] = $uploadfile;
+                                $umodel->configs = json_encode($configs2);
+                                $umodel->updated_by = $this->_user->id;
+                                $update3 = \ExtensionsModel\HostingCompanyModel::model()->update($umodel);
+                            }
+                        } catch (\Exception $e) {
+                            var_dump($e->getMessage()); exit;
+                        }
+                    }
                 }
 
                 if (isset($_POST['HostingCompany']['server_location'])) {
