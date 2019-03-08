@@ -95,7 +95,7 @@ class HostingExpertReviewModel extends \Model\BaseModel
 
     public function getLastData($data = null)
     {
-        $sql = 'SELECT t.*, r.name AS expert_name, r.email AS expert_email, r.image   
+        $sql = 'SELECT t.*, r.name AS expert_name, r.email AS expert_email, r.image
             FROM {tablePrefix}ext_hosting_expert_review t 
             LEFT JOIN {tablePrefix}ext_hosting_expert r ON r.id = t.expert_id 
             WHERE 1';
@@ -113,6 +113,20 @@ class HostingExpertReviewModel extends \Model\BaseModel
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
 
         $row = \Model\R::getRow( $sql, $params );
+
+        if (!empty($row['id'])) {
+            $params2 = ['expert_review_id' => $row['id']];
+            $sql2 = 'SELECT c.segment_id, s.title AS segment_title, c.title AS review_title, c.content AS review_content 
+              FROM {tablePrefix}ext_hosting_expert_review_content c 
+              LEFT JOIN {tablePrefix}ext_hosting_expert_review_segment s ON s.id = c.segment_id 
+              WHERE c.expert_review_id =:expert_review_id';
+            $sql2 = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql2);
+
+            $rows = \Model\R::getAll( $sql2, $params2 );
+            if (count($rows) > 0) {
+                $row['content'] = $rows;
+            }
+        }
 
         return $row;
     }
