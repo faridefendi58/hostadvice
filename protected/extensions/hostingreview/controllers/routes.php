@@ -30,6 +30,9 @@ $app->group('/hosting', function () use ($user) {
     $this->group('/reviewers', function() use ($user) {
         new Extensions\Controllers\ReviewersController($this, $user);
     });
+    $this->group('/expert-reviewers', function() use ($user) {
+        new Extensions\Controllers\ExpertReviewersController($this, $user);
+    });
 });
 
 ?>
