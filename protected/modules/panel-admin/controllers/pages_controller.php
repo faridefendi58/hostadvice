@@ -131,7 +131,8 @@ class PagesController extends BaseController
         $tools = new \PanelAdmin\Components\AdminTools($this->_settings);
         $page_content = $tools->getPage($args['name']);
         $format = new \PanelAdmin\Components\Format();
-        $full_content = $format->HTML($page_content['content']);
+        //$full_content = $format->HTML($page_content['content']);
+        $full_content = $page_content['content'];
         $old_content = $page_content['content'];
         $page_content['content'] = $full_content;
 
