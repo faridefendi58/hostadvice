@@ -73,4 +73,24 @@ class HostingReviewerModel extends \Model\BaseModel
 
         return $row;
     }
+
+    public function getCount($data = null)
+    {
+        $sql = 'SELECT COUNT(t.id) AS count  
+            FROM {tablePrefix}ext_hosting_reviewer t 
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (isset($data['status'])) {
+                $sql .= " AND t.status =:status";
+                $params['status'] = $data['status'];
+            }
+        }
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $row = \Model\R::getRow( $sql, $params );
+
+        return $row['count'];
+    }
 }
