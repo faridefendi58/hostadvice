@@ -94,6 +94,7 @@
                             <input name="HostingCompanyProduct[space][{{ ci }}]" type="text" class="form-control required" placeholder="0 untuk unlimited">
                             <span class="input-group-addon">GB</span>
                         </div>
+                        <span class="small">Format desimal ex: 0.5</span>
                     </div>
                     {% endif %}
                     {% if 'bandwidth' in cat_configs.features %}
@@ -103,6 +104,7 @@
                             <input name="HostingCompanyProduct[bandwidth][{{ ci }}]" type="text" class="form-control required" placeholder="0 untuk unlimited">
                             <span class="input-group-addon">GB</span>
                         </div>
+                        <span class="small">Format desimal ex: 0.5</span>
                     </div>
                     {% endif %}
                     {% if 'panel' in cat_configs.features %}
@@ -114,6 +116,7 @@
                             <option value="{{ panel }}">{{ panel }}</option>
                             {% endfor %}
                         </select>
+                        <span class="small">&nbsp;</span>
                     </div>
                     {% endif %}
                     {% if 'number_of_site' in cat_configs.features %}
@@ -226,9 +229,12 @@
                     alert_success.html(data.message);
                     alert_success.show();
                     alert_warning.hide();
+                    $('#product-feature-form-'+ci).find('.form-group').hide();
                     setTimeout(function () {
                         window.location.reload(true);
-                    }, 5000);
+                        //var uri = "{{ 'hosting/companies/update' | link }}/{{ model.id }}#service-product";
+                        //window.location.href = uri;
+                    }, 4000);
                 }
             },
             'errors': function (request, status, error) {

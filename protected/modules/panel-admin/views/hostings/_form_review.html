@@ -6,7 +6,7 @@
         <div class="col-md-6">
             <label class="control-label">Pilih Reviewer</label>
             {% set revrs = App.call.model("\\ExtensionsModel\\HostingReviewerModel", 'getData', {}) %}
-            <select id="s2_basic" name="HostingReview[reviewer_id]" class="form-control reviewer-list" onchange="chooseReviewer(this);">
+            <select id="s2_basic" name="HostingReview[reviewer_id]" class="form-control reviewer-list required" onchange="chooseReviewer(this);">
                 <option value="-">Pilih</option>
                 {% for fi,revr in revrs %}
                 <option value="{{ revr.id }}" attr-title="{{ revr.name }}"
@@ -51,7 +51,7 @@
         <div class="row">
             <div class="col-md-6">
                 <label class="control-label">Judul <span class="red">*</span></label>
-                <input type="text" name="HostingReview[title]" class="form-control" value="{{ data.title }}" required />
+                <input type="text" name="HostingReview[title]" class="form-control required" value="{{ data.title }}" required />
             </div>
             {% set products = App.call.model("\\ExtensionsModel\\HostingCompanyProductModel", 'getOptions', {'company_id':hosting_company_id}) %}
             <div class="col-md-6">
@@ -71,10 +71,14 @@
     </div>
     <div class="form-group">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <label class="control-label">Isi Review <span class="red">*</span></label>
-                <textarea name="HostingReview[content]" class="form-control review-content" rows="9" required>{{ data.content }}</textarea>
+                <textarea name="HostingReview[content]" class="form-control review-content required" rows="9" required>{{ data.content }}</textarea>
             </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="row">
             <div class="col-md-6">
                 <label class="control-label">Rate</label>
                 {% set rates = [1,2,3,4,5,6,7,8,9,10] %}
@@ -103,6 +107,15 @@
 {% block endbodyjs %}
 <script type="text/javascript">
     function saveReview(dt) {
+        if ($('.review-content').length > 0) {
+            $('.review-content').each(function () {
+                var the_id = $(this).attr("id");
+                var the_val = tinyMCE.get(the_id).getContent();
+                $(this).val(the_val);
+                console.log(the_val);
+            });
+        }
+
         $('form[id="review-form"]').find('.has-error').each(function () {
            $(this).removeClass('has-error');
         });
@@ -125,10 +138,6 @@
                     }
                 }
             }
-            /*var reviewer_image = $('.reviewer-image').val();
-            if (reviewer_image.length <= 0) {
-                errors.push('Kolom image wajib diisi.');
-            }*/
             $('#hosting_reviewer_id').val("");
         } else {
             var rev_id = $('#hosting_reviewer_id').val();
@@ -143,6 +152,14 @@
             errors.push('Content review wajib diisi.');
             $('.review-content').parent().addClass('has-error');
         }
+
+        /*var validate = jb_validation.validate($('form[id="review-form"]'));
+        if (!validate) {
+            return false;
+        }
+
+        var formData = new FormData($('form[id="review-form"]')[0]);
+        var url = $(dt).parent().parent().attr('action');*/
 
         console.log(errors);
         if (errors.length > 0) {
@@ -170,7 +187,9 @@
                     alert_success.html(data.message);
                     alert_success.show();
                     alert_warning.hide();
+                    $('form[id="review-form"]').find('.form-group').hide();
                     setTimeout(function () {
+                        var uri = "{{ 'hosting/companies/update' | link }}/{{ hosting_company_id }}#review"
                         window.location.reload(true);
                     }, 5000);
                 }
@@ -233,5 +252,34 @@
 
         return false;
     }
+
+    setTimeout(function () {
+        tinymce.init({
+            selector: '.review-content',
+            remove_linebreaks: false,
+            gecko_spellcheck: false,
+            keep_styles: true,
+            accessibility_focus: true,
+            tabfocus_elements: 'major-publishing-actions',
+            media_strict: false,
+            height: 100,
+            plugins: 'code image imagetools paste codesample',
+            menubar: false,
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link pastetext code codesample',
+            codesample_languages: [
+                {text: 'HTML/XML', value: 'markup'},
+                {text: 'JavaScript', value: 'javascript'},
+                {text: 'CSS', value: 'css'},
+                {text: 'PHP', value: 'php'},
+                {text: 'Ruby', value: 'ruby'},
+                {text: 'Python', value: 'python'},
+                {text: 'Java', value: 'java'},
+                {text: 'C', value: 'c'},
+                {text: 'C#', value: 'csharp'},
+                {text: 'C++', value: 'cpp'}
+            ],
+        });
+
+    }, 3000);
 </script>
 {% endblock %}

@@ -33,7 +33,7 @@
                         <a href="#" onclick="return updateExpertReview(this);" rel-id="{{ review.id }}">
                             <i class="fa fa-refresh"></i>
                         </a>
-                        <a href="#" onclick="return showUpdateDialog(this);" rel-id="{{ review.id }}">
+                        <a href="#" onclick="return showUpdateExpertDialog(this);" rel-id="{{ review.id }}">
                             <i class="fa fa-pencil"></i>
                         </a>
                         <a href="{{ 'hosting/companies/delete-expert-review' | link }}/{{ review.id }}" onclick="return hapusExpertReview(this);">
@@ -59,6 +59,7 @@
         </div>
     </div>
 </div>
+<script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
 <script type="text/javascript">
     function hapusExpertReview(dt) {
         if (confirm('Anda yakin ingin menghapus item ini ?')) {
@@ -105,7 +106,7 @@
         return false;
     }
 
-    function showUpdateDialog(dt) {
+    function showUpdateExpertDialog(dt) {
         var id = $(dt).attr('rel-id');
         $.ajax({
             'url': "{{ 'hosting/companies/update-expert-review-dialog' | link }}/{{ model.id }}?id="+ id,

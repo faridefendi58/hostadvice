@@ -76,6 +76,15 @@
 {% block endbodyjs %}
 <script type="text/javascript">
     function saveReview(dt) {
+        if ($('form[id="review-form-update"]').find('.review-content').length > 0) {
+            $('form[id="review-form-update"]').find('.review-content').each(function () {
+                var the_id = $(this).attr("id");
+                var the_val = tinyMCE.get(the_id).getContent();
+                $(this).val(the_val);
+                console.log(the_val);
+            });
+        }
+
         var validate = jb_validation.validate($('form[id="review-form-update"]'));
         if (!validate) {
             return false;
@@ -98,9 +107,10 @@
                     alert_success.html(data.message);
                     alert_success.show();
                     alert_warning.hide();
+                    $('form[id="review-form-update"]').find('.form-group').hide();
                     setTimeout(function () {
                         window.location.reload(true);
-                    }, 5000);
+                    }, 3000);
                 }
             },
             'errors': function (request, status, error) {
@@ -161,5 +171,33 @@
 
         return false;
     }
+
+    $(function () {
+        tinymce.init({
+            selector: '.review-content',
+            remove_linebreaks: false,
+            gecko_spellcheck: false,
+            keep_styles: true,
+            accessibility_focus: true,
+            tabfocus_elements: 'major-publishing-actions',
+            media_strict: false,
+            height: 100,
+            plugins: 'code image imagetools paste codesample',
+            menubar: false,
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link pastetext code codesample',
+            codesample_languages: [
+                {text: 'HTML/XML', value: 'markup'},
+                {text: 'JavaScript', value: 'javascript'},
+                {text: 'CSS', value: 'css'},
+                {text: 'PHP', value: 'php'},
+                {text: 'Ruby', value: 'ruby'},
+                {text: 'Python', value: 'python'},
+                {text: 'Java', value: 'java'},
+                {text: 'C', value: 'c'},
+                {text: 'C#', value: 'csharp'},
+                {text: 'C++', value: 'cpp'}
+            ],
+        });
+    });
 </script>
 {% endblock %}

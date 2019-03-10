@@ -67,7 +67,7 @@
                 <input type="text" name="HostingExpertReview[title][{{ segment.id }}]" class="form-control required" value="{{ cdata[segment_id].title }}" placeholder="Berikan judul atau kesimpulan singkat" required />
             </div>
             <div class="col-md-12 mb20">
-                <textarea name="HostingExpertReview[content][{{ segment.id }}]" class="form-control required" rows="2" placeholder="Tuliskan {{ segment.description }}" required>{{ cdata[segment_id].content }}</textarea>
+                <textarea name="HostingExpertReview[content][{{ segment.id }}]" class="form-control tinymce required" rows="2" placeholder="Tuliskan {{ segment.description }}" required>{{ cdata[segment_id].content }}</textarea>
             </div>
             {% if cdata %}
                 <input type="hidden" name="HostingExpertReview[id][{{ segment.id }}]" value="{{ cdata[segment_id].content_id }}">
@@ -113,6 +113,14 @@
 {% block endbodyjs %}
 <script type="text/javascript">
     function saveExpertReview(dt) {
+        if ($('.tinymce').length > 0) {
+            $('.tinymce').each(function () {
+                var the_id = $(this).attr("id");
+                var the_val = tinyMCE.get(the_id).getContent();
+                $(this).val(the_val);
+                console.log(the_val);
+            });
+        }
         var validate = jb_validation.validate($('form[id="expert-review-form"]'));
         if (!validate) {
             return false;
@@ -135,6 +143,7 @@
                     alert_success.html(data.message);
                     alert_success.show();
                     alert_warning.hide();
+                    $('form[id="expert-review-form"]').find('.form-group').hide();
                     setTimeout(function () {
                         window.location.reload(true);
                     }, 5000);
@@ -220,5 +229,33 @@
             $('select.reviewer-list').val(expert_id);
         }, 3000);
     }
+    setTimeout(function () {
+        tinymce.init({
+            selector: '.tinymce',
+            remove_linebreaks: false,
+            gecko_spellcheck: false,
+            keep_styles: true,
+            accessibility_focus: true,
+            tabfocus_elements: 'major-publishing-actions',
+            media_strict: false,
+            height: 100,
+            plugins: 'code image imagetools paste codesample',
+            menubar: false,
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link pastetext code codesample',
+            codesample_languages: [
+                {text: 'HTML/XML', value: 'markup'},
+                {text: 'JavaScript', value: 'javascript'},
+                {text: 'CSS', value: 'css'},
+                {text: 'PHP', value: 'php'},
+                {text: 'Ruby', value: 'ruby'},
+                {text: 'Python', value: 'python'},
+                {text: 'Java', value: 'java'},
+                {text: 'C', value: 'c'},
+                {text: 'C#', value: 'csharp'},
+                {text: 'C++', value: 'cpp'}
+            ],
+        });
+
+    }, 3000);
 </script>
 {% endblock %}
