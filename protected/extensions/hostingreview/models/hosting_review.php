@@ -182,6 +182,10 @@ class HostingReviewModel extends \Model\BaseModel
                 $sql .= " AND t.status =:status";
                 $params['status'] = $data['status'];
             }
+            if (isset($data['hosting_company_id'])) {
+                $sql .= " AND t.hosting_company_id =:hosting_company_id";
+                $params['hosting_company_id'] = $data['hosting_company_id'];
+            }
         }
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
 
