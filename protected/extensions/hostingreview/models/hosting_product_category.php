@@ -71,12 +71,42 @@ class HostingProductCategoryModel extends \Model\BaseModel
     {
         $sql = 'SELECT t.*  
             FROM {tablePrefix}ext_hosting_product_category t 
-            WHERE t.id =:id';
+            WHERE 1';
+
+        $params = [];
+        if (isset($data['id'])) {
+            $sql .= ' AND t.id =:id';
+            $params['id'] = $data['id'];
+        }
+
+        if (isset($data['slug'])) {
+            $sql .= ' AND t.slug =:slug';
+            $params['slug'] = $data['slug'];
+        }
 
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
 
-        $row = \Model\R::getRow( $sql, ['id' => $data['id']] );
+        $row = \Model\R::getRow( $sql, $params );
 
         return $row;
+    }
+
+    public function getItemsWithCounter($data = null)
+    {
+        $sql = 'SELECT t.*, (SELECT COUNT(p.id) FROM {tablePrefix}ext_hosting_company_product p WHERE p.category_id = t.id) AS count
+            FROM {tablePrefix}ext_hosting_product_category t  
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+        }
+
+        $sql .= ' ORDER BY t.created_at DESC';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+
+        return $rows;
     }
 }

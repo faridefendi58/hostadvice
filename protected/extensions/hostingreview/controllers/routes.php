@@ -9,6 +9,23 @@ $app->get('/hosting-company/[{name}]', function ($request, $response, $args) {
     ]);
 });
 
+$app->get('/hosting-services/[{slug}]', function ($request, $response, $args) {
+    $model = new \ExtensionsModel\HostingProductCategoryModel();
+    $data = $model->getItem(['slug' => $args['slug']]);
+
+    $companies = [];
+    if (!empty($data['id'])) {
+        $cmodel = new \ExtensionsModel\HostingCompanyModel();
+        $companies = $cmodel->getItemsByProductCategory($data['id']);
+    }
+    //var_dump($companies); exit;
+
+    return $this->view->render($response, 'hosting_services.phtml', [
+        'data' => $data,
+        'companies' => $companies
+    ]);
+});
+
 foreach (glob(__DIR__.'/*_controller.php') as $controller) {
 	$cname = basename($controller, '.php');
 	if (!empty($cname)) {

@@ -102,4 +102,20 @@ class HostingCompanyModel extends \Model\BaseModel
 
         return $row;
     }
+
+    public function getItemsByProductCategory($category_id)
+    {
+        $sql = 'SELECT t.* 
+            FROM {tablePrefix}ext_hosting_company t 
+            LEFT JOIN {tablePrefix}ext_hosting_company_product p ON p.company_id = t.id 
+            WHERE p.category_id =:category_id';
+
+        $sql .= ' GROUP BY t.id ORDER BY t.rangking ASC';
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, ['category_id' => $category_id] );
+
+        return $rows;
+    }
 }
