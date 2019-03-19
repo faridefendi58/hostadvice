@@ -26,6 +26,20 @@ $app->get('/hosting-services/[{slug}]', function ($request, $response, $args) {
     ]);
 });
 
+$app->post('/product-list', function ($request, $response, $args) {
+    $params = $request->getParams();
+
+    $model = \ExtensionsModel\HostingCompanyModel::model()->findByPk($params['company_id']);
+    if ($model instanceof \RedBeanPHP\OODBBean) {
+        $pmodel = new \ExtensionsModel\HostingCompanyProductModel();
+        $options = $pmodel->getOptions(['company_id' => $model->id]);
+
+        return $this->view->render($response, 'partial/_product_option.phtml', [
+            'options' => $options,
+        ]);
+    }
+});
+
 foreach (glob(__DIR__.'/*_controller.php') as $controller) {
 	$cname = basename($controller, '.php');
 	if (!empty($cname)) {

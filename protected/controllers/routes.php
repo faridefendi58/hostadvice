@@ -197,3 +197,80 @@ $app->post('/tracking', function ($request, $response, $args) {
         exit;
     }
 });
+
+$app->post('/tulis-ulasan', function ($request, $response, $args) {
+    $params = $request->getParams();
+
+    $success = 0; $message = 'Failed to save';
+    if (isset($params['Review'])) {
+        $errors = [];
+        if (empty($params['Review']['title'])) {
+            $errors['title'] = 'Title is required';
+        }
+
+        if (empty($params['Review']['company_id'])) {
+            $errors['company_id'] = 'Company is required';
+        }
+
+        if (empty($params['Review']['product_id'])) {
+            $errors['product_id'] = 'Product is required';
+        }
+
+        if (count($errors) > 0) {
+            var_dump($errors); exit;
+        } else {
+            $rmodel = \ExtensionsModel\HostingReviewerModel::model()->findByAttributes(['email' => $params['Review']['email']]);
+            $reviewer_id = 0;
+            if ($rmodel instanceof \RedBeanPHP\OODBBean) {
+                $reviewer_id = $rmodel->id;
+            } else {
+                $model = new \ExtensionsModel\HostingReviewerModel();
+                $model->name = $params['Review']['name'];
+                $model->email = $params['Review']['email'];
+                $model->phone = $params['Review']['phone'];
+                if (isset($params['Review']['website'])) {
+                    $model->website = $params['Review']['website'];
+                }
+                $model->status = \ExtensionsModel\HostingReviewerModel::STATUS_INACTIVE;
+                $model->created_at = date("Y-m-d H:i:s");
+                $model->updated_at = date("Y-m-d H:i:s");
+                $save = \ExtensionsModel\HostingReviewerModel::model()->save(@$model);
+                if ($save) {
+                    $reviewer_id = $model->id;
+                }
+            }
+
+            $model2 = new \ExtensionsModel\HostingReviewModel();
+            $model2->hosting_company_id = $params['Review']['company_id'];
+            $model2->reviewer_id = $reviewer_id;
+            $model2->product_id = $params['Review']['product_id'];
+            $model2->title = $params['Review']['title'];
+            $model2->content = $params['Review']['content'];
+            $a = array_filter($params['Review']['rate']);
+            $average = array_sum($a)/count($a);
+            $model2->rate = $average;
+            $model2->status = \ExtensionsModel\HostingReviewModel::STATUS_PENDING;
+            $model2->created_at = date("Y-m-d H:i:s");
+            $model2->updated_at = date("Y-m-d H:i:s");
+            $save2 = \ExtensionsModel\HostingReviewModel::model()->save(@$model2);
+            if ($save2) {
+                foreach ($params['Review']['rate'] as $category_id => $rate) {
+                    $model3 = new \ExtensionsModel\HostingRateModel();
+                    $model3->review_id = $model2->id;
+                    $model3->category_id = $category_id;
+                    $model3->value = $rate;
+                    $model3->created_at = date("Y-m-d H:i:s");
+                    $save3 = \ExtensionsModel\HostingRateModel::model()->save(@$model3);
+                }
+
+                $success = 1;
+                $message = 'Your review is successfully saved. We will check soon.';
+            }
+        }
+    }
+
+    return $this->view->render($response, 'tulis-ulasan.phtml', [
+        'success' => $success,
+        'message' => $message
+    ]);
+});
