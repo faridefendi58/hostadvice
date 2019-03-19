@@ -197,7 +197,8 @@ class HostingReviewModel extends \Model\BaseModel
     public function getRates($data = null)
     {
         $sql = 'SELECT t.hosting_company_id, c.title AS company_name, c.slug AS company_slug,
-            c.configs AS company_configs, AVG(r.value) AS average, COUNT(t.reviewer_id) AS tot_reviewer   
+            c.configs AS company_configs, AVG(r.value) AS average, COUNT(t.reviewer_id) AS tot_reviewer, 
+            COUNT(t.id) AS tot_review   
             FROM {tablePrefix}ext_hosting_review t 
             JOIN {tablePrefix}ext_hosting_rate r ON r.review_id = t.id 
             LEFT JOIN {tablePrefix}ext_hosting_company c ON c.id = t.hosting_company_id
