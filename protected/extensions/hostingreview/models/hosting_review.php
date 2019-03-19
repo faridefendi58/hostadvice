@@ -193,4 +193,45 @@ class HostingReviewModel extends \Model\BaseModel
 
         return $row['count'];
     }
+
+    public function getRates($data = null)
+    {
+        $sql = 'SELECT t.hosting_company_id, c.title AS company_name, c.slug AS company_slug,
+            c.configs AS company_configs, AVG(r.value) AS average, COUNT(t.reviewer_id) AS tot_reviewer   
+            FROM {tablePrefix}ext_hosting_review t 
+            JOIN {tablePrefix}ext_hosting_rate r ON r.review_id = t.id 
+            LEFT JOIN {tablePrefix}ext_hosting_company c ON c.id = t.hosting_company_id
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (isset($data['exclude'])) {
+                $sql .= ' AND t.hosting_company_id <> :exclude';
+                $params['exclude'] = $data['exclude'];
+            }
+        }
+
+        $sql .= ' GROUP BY t.hosting_company_id';
+
+        if (is_array($data)) {
+            if (isset($data['max_rate'])) {
+                $sql .= ' HAVING average <:max_rate';
+                $params['max_rate'] = $data['max_rate'];
+            }
+        }
+
+        $sql .= ' ORDER BY average DESC';
+
+        if (is_array($data)) {
+            if (isset($data['limit'])) {
+                $sql .= ' LIMIT '. $data['limit'];
+            }
+        }
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+
+        return $rows;
+    }
 }
