@@ -1,0 +1,214 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Update Review - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<div id="main_wrapper">
+    <div class="page_bar clearfix">
+        <div class="row">
+            <div class="col-sm-10">
+                <h1 class="page_title">Update Review #{{ model.id }}</h1>
+                <p class="text-muted">Update review</p>
+            </div>
+            <div class="col-sm-2 text-right">
+                <a class="btn btn-default" href="{{ 'hosting/reviews/view' | link }}?status={{ model.status }}">Daftar Review</a>
+            </div>
+        </div>
+    </div>
+    <div class="page_content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"></div>
+                        <div class="panel-body">
+                            <form method="post" id="review-form-update"
+                                  action="{{ 'hosting/reviews/update' | link }}/{{ model.id }}">
+                                <div class="alert alert-success" style="display: none;"></div>
+                                <div class="alert alert-warning" style="display: none;"></div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Pilih Reviewer</label>
+                                        {% set revrs = App.call.model("\\ExtensionsModel\\HostingReviewerModel", 'getData', {}) %}
+                                        <select id="s2_basic" name="HostingReview[reviewer_id]" class="form-control reviewer-list" onchange="chooseReviewer(this);">
+                                            <option value="-">Pilih</option>
+                                            {% for fi,revr in revrs %}
+                                            <option value="{{ revr.id }}" attr-title="{{ revr.name }}"
+                                                    attr-email="{{ revr.email }}" {% if model.reviewer_id and revr.id == model.reviewer_id %}selected="selected"{% endif %}>{{ revr.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="clearfix mb10"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label">Rate</label>
+                                        {% set rates = [1,2,3,4,5,6,7,8,9,10] %}
+                                        {% set categories = App.call.model("\\ExtensionsModel\\HostingRateCategoryModel", 'getData', {}) %}
+                                        {% set rdata = App.call.model("\\ExtensionsModel\\HostingRateModel", 'getRateByReview', {'review_id':model.id, 'reviewer_id':model.reviewer_id}) %}
+                                        {% for ci, category in categories %}
+                                        <div class="input-group mb10">
+                                            {% set cat_id = category.id %}
+                                            <span class="input-group-addon">{{ category.title }}</span>
+                                            <select name="HostingReview[rate][{{ category.id }}]" class="form-control required">
+                                                {% for i,rate in rates %}
+                                                <option value="{{ rate }}" {% if rdata and rdata[cat_id].value == rate %}selected="selected"{% endif %}>{{ rate }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label">Status</label>
+                                        {% set statuses = App.call.model("\\ExtensionsModel\\HostingReviewModel", 'getStatuses', {}) %}
+                                        <select name="HostingReview[status]" class="form-control">
+                                            <option value="-">Pilih</option>
+                                            {% for status_id,status_name in statuses %}
+                                            <option value="{{ status_id }}" {% if status_id == model.status %}selected="selected"{% endif %}>{{ status_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="clearfix mb10"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveReview(this);">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+
+                                    <div class="form-group">
+                                        <label class="control-label">Hosting Company</label>
+                                        {% set companies = App.call.model("\\ExtensionsModel\\HostingCompanyModel", 'getData', {'status':'enabled'}) %}
+                                        <select name="HostingReview[company_id]" class="form-control large_input required" id="company_id" required>
+                                            <option value="">- Choose -</option>
+                                            {% for j, company in companies %}
+                                            <option value="{{ company.id }}" {% if company.id == model.hosting_company_id %}selected="selected"{% endif %}>{{ company.title }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label">Hosting Product</label>
+                                        {% set options = App.call.model("\\ExtensionsModel\\HostingCompanyProductModel", 'getOptions', {'company_id':model.hosting_company_id}) %}
+                                        <div class="service-selector">
+                                        <select class="form-control" name="HostingReview[product_id]" id="product_id">
+                                            {% for category_id, option in options %}
+                                            {% set category = App.call.model("\\ExtensionsModel\\HostingProductCategoryModel", 'getItem', {'id':category_id}) %}
+                                            <optgroup label="{{ category.title }}">
+                                                {% for i, opt in option %}
+                                                <option value="{{ opt.id }}" {% if opt.id == model.product_id %}selected="selected"{% endif %}>{{ opt.title }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                            {% endfor %}
+                                        </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <textarea name="HostingReview[content]" class="form-control tinymce required" rows="1" required>{{ model.content }}</textarea>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+    function saveReview(dt) {
+        if ($('.tinymce').length > 0) {
+            $('.tinymce').each(function () {
+                var the_id = $(this).attr("id");
+                var the_val = tinyMCE.get(the_id).getContent();
+                $(this).val(the_val);
+                console.log(the_val);
+            });
+        }
+
+        var validate = jb_validation.validate($('form[id="review-form-update"]'));
+        if (!validate) {
+            return false;
+        }
+
+        var formData = new FormData($('form[id="review-form-update"]')[0]);
+        var url = $(dt).parent().parent().attr('action');
+
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data': formData,
+            'dataType': 'json',
+            'async': false,
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    var alert_success = $('#review-form-update').find('.alert-success');
+                    var alert_warning = $('#review-form-update').find('.alert-warning');
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    alert_warning.hide();
+                    $('form[id="review-form-update"]').find('.form-group').hide();
+                    setTimeout(function () {
+                        window.location.reload(true);
+                    }, 5000);
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
+        });
+
+        return false;
+    }
+
+    $(function () {
+        tinymce.init({
+            selector: '.tinymce',
+            remove_linebreaks: false,
+            gecko_spellcheck: false,
+            keep_styles: true,
+            accessibility_focus: true,
+            tabfocus_elements: 'major-publishing-actions',
+            media_strict: false,
+            height: 100,
+            plugins: 'code image imagetools paste codesample',
+            menubar: false,
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link pastetext code codesample',
+            codesample_languages: [
+                {text: 'HTML/XML', value: 'markup'},
+                {text: 'JavaScript', value: 'javascript'},
+                {text: 'CSS', value: 'css'},
+                {text: 'PHP', value: 'php'},
+                {text: 'Ruby', value: 'ruby'},
+                {text: 'Python', value: 'python'},
+                {text: 'Java', value: 'java'},
+                {text: 'C', value: 'c'},
+                {text: 'C#', value: 'csharp'},
+                {text: 'C++', value: 'cpp'}
+            ],
+        });
+
+        $('select[id="company_id"]').change(function () {
+            var $this = $(this);
+            $.ajax({
+                'url': "{{ 'product-list' | link }}",
+                'type':'post',
+                'data': {'company_id' : $this.val()},
+                'success': function(data) {
+                    $('.service-selector').html(data);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

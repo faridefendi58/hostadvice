@@ -37,11 +37,12 @@ class HostingReviewModel extends \Model\BaseModel
     public function getData($data = null)
     {
         $sql = 'SELECT t.*, r.name AS reviewer_name, r.email AS reviewer_email, r.image, 
-          p.title AS product_name, c.title AS product_category_name, c.slug AS product_category_slug  
+          p.title AS product_name, c.title AS product_category_name, c.slug AS product_category_slug, cp.title AS company_name  
             FROM {tablePrefix}ext_hosting_review t 
             LEFT JOIN {tablePrefix}ext_hosting_reviewer r ON r.id = t.reviewer_id 
             LEFT JOIN {tablePrefix}ext_hosting_company_product p ON p.id = t.product_id 
             LEFT JOIN {tablePrefix}ext_hosting_product_category c ON c.id = p.category_id 
+            LEFT JOIN {tablePrefix}ext_hosting_company cp ON cp.id = t.hosting_company_id 
             WHERE 1';
 
         $sql .= ' AND t.status=:status';
@@ -52,7 +53,7 @@ class HostingReviewModel extends \Model\BaseModel
                 $params['hosting_company_id'] = $data['hosting_company_id'];
             }
             if (isset($data['status'])) {
-                $param['status'] = $data['status'];
+                $params['status'] = $data['status'];
             }
         }
 

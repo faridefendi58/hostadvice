@@ -64,6 +64,9 @@ $app->group('/hosting', function () use ($user) {
     $this->group('/expert-reviewers', function() use ($user) {
         new Extensions\Controllers\ExpertReviewersController($this, $user);
     });
+    $this->group('/reviews', function() use ($user) {
+        new Extensions\Controllers\ReviewsController($this, $user);
+    });
 });
 
 ?>
