@@ -58,6 +58,10 @@ class HostingCompanyModel extends \Model\BaseModel
             $sql .= ' ORDER BY t.created_at DESC';
         }
 
+        if (isset($data['limit'])) {
+            $sql .= ' LIMIT '. $data['limit'];
+        }
+
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
 
         $rows = \Model\R::getAll( $sql, $params );
