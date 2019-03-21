@@ -62,7 +62,8 @@ class PostModel extends \Model\BaseModel
     public function getPosts($data)
     {
         $sql = "SELECT t.status, c.post_id, c.title, c.meta_description, c.content, c.slug, l.id, l.language_name, 
-        t.created_at, t.updated_at, ad.username AS author, ad.name AS author_name   
+        t.created_at, t.updated_at, 
+        ad.username AS author, ad.name AS author_name, ad.image AS author_image, ad.about AS author_about   
         FROM {tablePrefix}ext_post t 
         LEFT JOIN {tablePrefix}ext_post_content c ON c.post_id = t.id 
         LEFT JOIN {tablePrefix}ext_post_language l ON l.id = c.language
@@ -113,7 +114,8 @@ class PostModel extends \Model\BaseModel
     {
         $sql = "SELECT c.post_id, t.status, t.allow_comment, t.tags, t.created_at, t.updated_at, 
           c.title, c.content, c.slug, l.id AS language_id, 
-          c.meta_keywords, c.meta_description, l.language_name, ad.username AS author, ad.name AS author_name 
+          c.meta_keywords, c.meta_description, l.language_name, 
+          ad.username AS author, ad.name AS author_name, ad.image AS author_image, ad.about AS author_about 
         FROM {tablePrefix}ext_post t 
         LEFT JOIN {tablePrefix}ext_post_content c ON c.post_id = t.id 
         LEFT JOIN {tablePrefix}ext_post_language l ON l.id = c.language  
@@ -130,7 +132,10 @@ class PostModel extends \Model\BaseModel
             'allow_comment' => $rows[0]['allow_comment'],
             'tags' => (!empty($rows[0]['tags']))? self::string2array($rows[0]['tags']) : array(),
             'tags_string' => $rows[0]['tags'],
-            'author' => $rows[0]['author_name'],
+            'author' => $rows[0]['author'],
+            'author_name' => $rows[0]['author_name'],
+            'author_image' => $rows[0]['author_image'],
+            'author_about' => $rows[0]['author_about'],
             'created_at' => $rows[0]['created_at'],
             'updated_at' => $rows[0]['updated_at'],
         ];
@@ -164,7 +169,8 @@ class PostModel extends \Model\BaseModel
     {
         $sql = "SELECT c.post_id, t.status, t.allow_comment, t.tags, t.created_at, t.updated_at, 
           c.title, c.content, c.slug, l.id AS language_id, 
-          c.meta_keywords, c.meta_description, l.language_name, ad.username AS author, ad.name AS author_name 
+          c.meta_keywords, c.meta_description, l.language_name, 
+          ad.username AS author, ad.name AS author_name, ad.image AS author_image, ad.about AS author_about 
         FROM {tablePrefix}ext_post t 
         LEFT JOIN {tablePrefix}ext_post_content c ON c.post_id = t.id 
         LEFT JOIN {tablePrefix}ext_post_language l ON l.id = c.language  
@@ -183,6 +189,8 @@ class PostModel extends \Model\BaseModel
             'tags_string' => $row['tags'],
             'author' => $row['author'],
             'author_name' => $row['author_name'],
+            'author_image' => $row['author_image'],
+            'author_about' => $row['author_about'],
             'created_at' => $row['created_at'],
             'updated_at' => $row['updated_at'],
             'title' => $row['title'],

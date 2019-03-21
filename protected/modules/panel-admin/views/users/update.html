@@ -4,6 +4,7 @@ Update User - {{ model.username }} - {{ App.name }}
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ 'css/bootstrap-fileupload.min.css' | admin_asset_url }}" />
 <div id="main_wrapper">
 	<div class="page_bar clearfix">
 		<div class="row">
@@ -28,7 +29,7 @@ Update User - {{ model.username }} - {{ App.name }}
 						{% if message %}
 							<div class="alert {% if success %}alert-success{% else %}alert-warning{% endif %}">{{ message | raw }}</div>
 						{% endif %}
-						<form method="post" name="user-update" class="form-horizontal">
+						<form method="post" name="user-update" class="form-horizontal" enctype="multipart/form-data">
 							<div class="form-group">
 								<label class="col-sm-2 control-label">Username <span class="red">*</span></label>
 								<div class="col-sm-6">
@@ -45,6 +46,34 @@ Update User - {{ model.username }} - {{ App.name }}
 								<label class="col-sm-2 control-label">Email <span class="red">*</span></label>
 								<div class="col-sm-6">
 									<input name="Admin[email]" type="text" class="form-control" value="{{ model.email }}">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">About</label>
+								<div class="col-sm-6">
+									<textarea name="Admin[about]" class="form-control">{{ model.about }}</textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">Image</label>
+								<div class="col-sm-6">
+									{% if model.image %}
+									<img src="{{ model.image | link }}" class="img-responsive" style="max-height: 100px;"/><br/>
+									{% endif %}
+									<div class="fileupload fileupload-new" data-provides="fileupload">
+										<div class="input-append">
+											<div class="uneditable-input">
+												<i class="glyphicon glyphicon-file fileupload-exists"></i>
+												<span class="fileupload-preview"></span>
+											</div>
+											<span class="btn btn-default btn-file">
+											<span class="fileupload-new">Select file</span>
+											<span class="fileupload-exists">Change</span>
+											<input type="file" name="Admin[image]" class="reviewer-image"/>
+										</span>
+											<a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+										</div>
+									</div>
 								</div>
 							</div>
 							<div class="form-group">
@@ -82,6 +111,7 @@ Update User - {{ model.username }} - {{ App.name }}
 {% include 'partial/right_menu.html' %}
 {% endblock %}
 {% block endbodyjs %}
+<script src="{{ 'js/bootstrap-fileupload.min.js' | admin_asset_url }}"></script>
 <script type="text/javascript">
 	$(function () {
 		var success_message = "{{ message }}";

@@ -95,15 +95,37 @@ class UsersController extends BaseController
             //$model->password = $model->hasPassword($_POST['Admin']['password'], $model->salt);
             $model->username = $_POST['Admin']['username'];
             $model->email = $_POST['Admin']['email'];
+            $model->about = $_POST['Admin']['about'];
             $model->group_id = $_POST['Admin']['group_id'];
             $model->status = $_POST['Admin']['status'];
             $model->created_at = date('Y-m-d H:i:s');
-            $create = \Model\AdminModel::model()->save($model);
+            $create = \Model\AdminModel::model()->save(@$model);
 
             if ($create) {
                 $bean = \Model\AdminModel::model()->findByAttributes(['username'=>$model->username]);
                 $bean->password = $model->hasPassword($model->password, $model->salt);
                 $update = \Model\AdminModel::model()->update($bean, false);
+
+                // save image if any
+                $uploadfile = null;
+                if (isset($_FILES['Admin'])) {
+                    $path_info = pathinfo($_FILES['Admin']['name']['image']);
+                    if (in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                        $upload_folder = 'uploads/images/authors';
+                        $file_name = time().'.'.$path_info['extension'];
+                        $uploadfile = $upload_folder . '/' . $file_name;
+                        try {
+                            $upload = move_uploaded_file($_FILES['Admin']['tmp_name']['image'], $uploadfile);
+                        } catch (\Exception $e) {}
+                    }
+                }
+
+                if (!empty($uploadfile)) {
+                    $model2 = \Model\AdminModel::model()->findByPk($model->id);
+                    $model2->image = $uploadfile;
+                    $model2->updated_at = date("Y-m-d H:i:s");
+                    $update = \Model\AdminModel::model()->update($model2);
+                }
 
                 $message = 'Data Anda telah berhasil disimpan.';
                 $success = true;
@@ -138,11 +160,33 @@ class UsersController extends BaseController
             $model->username = $_POST['Admin']['username'];
             $model->name = $_POST['Admin']['name'];
             $model->email = $_POST['Admin']['email'];
+            $model->about = $_POST['Admin']['about'];
             $model->group_id = $_POST['Admin']['group_id'];
             $model->status = $_POST['Admin']['status'];
             $model->updated_at = date('Y-m-d H:i:s');
             $update = \Model\AdminModel::model()->update($model);
             if ($update) {
+                // save image if any
+                $uploadfile = null;
+                if (isset($_FILES['Admin'])) {
+                    $path_info = pathinfo($_FILES['Admin']['name']['image']);
+                    if (in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
+                        $upload_folder = 'uploads/images/authors';
+                        $file_name = time().'.'.$path_info['extension'];
+                        $uploadfile = $upload_folder . '/' . $file_name;
+                        try {
+                            $upload = move_uploaded_file($_FILES['Admin']['tmp_name']['image'], $uploadfile);
+                        } catch (\Exception $e) {}
+                    }
+                }
+
+                if (!empty($uploadfile)) {
+                    $model2 = \Model\AdminModel::model()->findByPk($model->id);
+                    $model2->image = $uploadfile;
+                    $model2->updated_at = date("Y-m-d H:i:s");
+                    $update = \Model\AdminModel::model()->update($model2);
+                }
+
                 $message = 'Data Anda telah berhasil diubah.';
                 $success = true;
             } else {
@@ -170,8 +214,13 @@ class UsersController extends BaseController
         }
 
         $model = \Model\AdminModel::model()->findByPk($args['id']);
+        $image = $model->image;
         $delete = \Model\AdminModel::model()->delete($model);
         if ($delete) {
+            if (file_exists($image)) {
+                unlink($image);
+            }
+
             $message = 'Your data is successfully deleted.';
             echo true;
         }
