@@ -5,6 +5,8 @@ require_once __DIR__ . '/base.php';
 
 class AdminModel extends \Model\BaseModel
 {
+    protected $exclude_attributes = [ 'password_repeat' ];
+
     public static function model($className=__CLASS__)
     {
         return parent::model($className);
@@ -23,13 +25,23 @@ class AdminModel extends \Model\BaseModel
         // NOTE: you should only define rules for those attributes that
         // will receive user inputs.
         return [
-            ['username, email, group_id, status', 'required'],
+            ['username, name, email, group_id, status', 'required'],
             ['username', 'length', 'min'=>3, 'max'=>32],
             ['username, email', 'unique'],
-            ['password', 'required', 'on'=>'create'],
+            ['password, password_repeat', 'required', 'on'=>'create'],
+            ['password', 'compare', 'on'=>'create', 'compareAttribute'=>'password_repeat'],
             ['password', 'length', 'min'=>8, 'on'=>'create'],
             ['email', 'email'],
             ['group_id', 'numerical', 'integerOnly' => true],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'name' => 'Full Name',
+            'password_repeat' => 'Password Repeat',
         ];
     }
 

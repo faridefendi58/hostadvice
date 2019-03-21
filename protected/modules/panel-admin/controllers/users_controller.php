@@ -84,10 +84,14 @@ class UsersController extends BaseController
 
         $model = new \Model\AdminModel('create');
 
+        $errors = [];
         if (isset($_POST['Admin'])){
             $model->username = $_POST['Admin']['username'];
+            $model->name = $_POST['Admin']['name'];
             $model->salt = md5(uniqid());
             $model->password = $_POST['Admin']['password'];
+            $model->password_repeat = $_POST['Admin']['password_repeat'];
+
             //$model->password = $model->hasPassword($_POST['Admin']['password'], $model->salt);
             $model->username = $_POST['Admin']['username'];
             $model->email = $_POST['Admin']['email'];
@@ -95,6 +99,7 @@ class UsersController extends BaseController
             $model->status = $_POST['Admin']['status'];
             $model->created_at = date('Y-m-d H:i:s');
             $create = \Model\AdminModel::model()->save($model);
+
             if ($create) {
                 $bean = \Model\AdminModel::model()->findByAttributes(['username'=>$model->username]);
                 $bean->password = $model->hasPassword($model->password, $model->salt);
@@ -103,8 +108,8 @@ class UsersController extends BaseController
                 $message = 'Data Anda telah berhasil disimpan.';
                 $success = true;
             } else {
-                $message = \Model\AdminModel::model()->getErrors(false);
                 $errors = \Model\AdminModel::model()->getErrors(true, true);
+                $message = \Model\AdminModel::model()->getErrors(false);
                 $success = false;
             }
         }
@@ -131,9 +136,11 @@ class UsersController extends BaseController
 
         if (isset($_POST['Admin'])){
             $model->username = $_POST['Admin']['username'];
+            $model->name = $_POST['Admin']['name'];
             $model->email = $_POST['Admin']['email'];
             $model->group_id = $_POST['Admin']['group_id'];
             $model->status = $_POST['Admin']['status'];
+            $model->updated_at = date('Y-m-d H:i:s');
             $update = \Model\AdminModel::model()->update($model);
             if ($update) {
                 $message = 'Data Anda telah berhasil diubah.';
