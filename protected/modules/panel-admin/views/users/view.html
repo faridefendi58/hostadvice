@@ -31,7 +31,8 @@ Kelola User - {{ App.name }}
                                     <thead>
                                     <tr>
                                         <th>id</th>
-                                        <th>Nama</th>
+                                        <th>Username</th>
+                                        <th>Nama Lengkap</th>
                                         <th>Email</th>
                                         <th>Hak Akses</th>
                                         <th>Status</th>
@@ -43,6 +44,7 @@ Kelola User - {{ App.name }}
                                     <tr>
                                         <td><center>{{ i + 1 }}</center></td>
                                         <td>{{ model.username }}</td>
+                                        <td>{{ model.name }}</td>
                                         <td>{{ model.email }}</td>
                                         <td>
                                             <center>
