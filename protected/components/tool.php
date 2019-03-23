@@ -71,7 +71,7 @@ class Tool
         $pages = array();
         foreach (glob($_SERVER['DOCUMENT_ROOT'].'/themes/'.$omodel->getOptions()['theme'].'/views/*.phtml') as $filename) {
             $page = basename($filename, '.phtml');
-            $excludes = ['post', 'sitemap.xml', '404'];
+            $excludes = ['post', 'sitemap.xml', '404', 'admin-ajax'];
             if (file_exists($filename) && !in_array($page, $excludes) && strpos($page, "_") == false) {
                 $loc = self::url_origin().'/'.$page;
                 if ($page == 'index') {
@@ -92,6 +92,16 @@ class Tool
             $pmodel = new \ExtensionsModel\PostModel();
             $posts = $pmodel->getSitemaps();
             $results = array_merge($results, $posts);
+        }
+
+        if (array_key_exists("hostingreview", $exts)) {
+            $pmodel = new \ExtensionsModel\HostingCompanyModel();
+            $hosts = $pmodel->getSitemaps();
+            $results = array_merge($results, $hosts);
+
+            $pcmodel = new \ExtensionsModel\HostingProductCategoryModel();
+            $host_cat = $pcmodel->getSitemaps();
+            $results = array_merge($results, $host_cat);
         }
 
         return $results;

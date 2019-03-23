@@ -122,4 +122,36 @@ class HostingCompanyModel extends \Model\BaseModel
 
         return $rows;
     }
+
+    public function getSitemaps($data = [])
+    {
+        $sql = "SELECT t.*  
+        FROM {tablePrefix}ext_hosting_company t
+        WHERE t.status =:status";
+
+        $params = [ 'status' => self::STATUS_ENABLED ];
+
+        $sql .= " ORDER BY t.created_at ASC";
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+        $items = [];
+        if (count($rows) > 0) {
+            $tool = new \Components\Tool();
+            $url_origin = $tool->url_origin();
+            $categories = [];
+            foreach ($rows as $i => $row) {
+                if (!in_array($row['slug'], $categories)) {
+                    $items[] = [
+                        'loc' => $url_origin.'/hosting-company/'.$row['slug'],
+                        'lastmod' => date("c"),
+                        'priority' => 0.5
+                    ];
+                    array_push($categories, $row['slug']);
+                }
+            }
+        }
+        return $items;
+    }
 }
