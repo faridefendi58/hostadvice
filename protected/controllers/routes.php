@@ -15,7 +15,6 @@ $app->get('/niagahoster', function ($request, $response, $args) {
 
 $app->get('/sitemap.xml', function ($request, $response, $args) {
     $tools = new \Components\Tool();
-    var_dump($tools->get_sitemaps()); exit;
 
     $this->view->render($response, 'sitemap.xml', [
         'results' => $tools->get_sitemaps()
