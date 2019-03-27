@@ -159,4 +159,10 @@ class Tool
 
         return $lang;
     }
+
+    public function get_url_params() {
+        parse_str($_SERVER['QUERY_STRING'], $output);
+
+        return $output;
+    }
 }

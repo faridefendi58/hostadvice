@@ -40,6 +40,8 @@ class HostingCompanyModel extends \Model\BaseModel
         $sql = 'SELECT t.*, a.name AS admin_name  
             FROM {tablePrefix}ext_hosting_company t 
             LEFT JOIN {tablePrefix}admin a ON a.id = t.created_by 
+            LEFT JOIN {tablePrefix}ext_hosting_server_location l ON l.hosting_company_id = t.id 
+            LEFT JOIN {tablePrefix}country c ON c.id = l.country_id 
             WHERE 1';
 
         $params = [];
@@ -48,6 +50,11 @@ class HostingCompanyModel extends \Model\BaseModel
                 $sql .= ' AND t.status =:status';
                 $params['status'] = $data['status'];
             }
+        }
+
+        if (isset($data['server_location'])) {
+            $sql .= ' AND LOWER(c.title) =:server_location';
+            $params['server_location'] = strtolower($data['server_location']);
         }
 
         if (isset($data['order_by'])) {
