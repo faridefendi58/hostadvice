@@ -57,6 +57,8 @@ class HostingCompanyModel extends \Model\BaseModel
             $params['server_location'] = strtolower($data['server_location']);
         }
 
+        $sql .= ' GROUP BY t.id';
+
         if (isset($data['order_by'])) {
             if ($data['order_by'] == 'rangking') {
                 $sql .= ' ORDER BY t.rangking ASC';
