@@ -123,7 +123,7 @@ class HostingReviewModel extends \Model\BaseModel
 
     public function getRate($data = null)
     {
-        $sql = 'SELECT AVG(r.value) AS average, COUNT(t.reviewer_id) AS tot_reviewer   
+        $sql = 'SELECT AVG(r.value) AS average, COUNT(DISTINCT (t.reviewer_id)) AS tot_reviewer   
             FROM {tablePrefix}ext_hosting_review t 
             JOIN {tablePrefix}ext_hosting_rate r ON r.review_id = t.id 
             WHERE 1';
