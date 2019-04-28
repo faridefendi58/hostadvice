@@ -127,6 +127,9 @@ class Tool
 
     public function translate($text) {
         $current_lang = self::getConfigs('language');
+        if (isset($_COOKIE['lang'])) {
+            $current_lang = $_COOKIE['lang'];
+        }
         $lang = 'en';
         if (!empty($current_lang)) {
             $lang = $current_lang;
@@ -152,6 +155,9 @@ class Tool
 
     public function get_current_language() {
         $current_lang = self::getConfigs('language');
+        if (isset($_COOKIE['lang'])) {
+            $current_lang = $_COOKIE['lang'];
+        }
         $lang = 'en';
         if (!empty($current_lang)) {
             $lang = $current_lang;

@@ -25,7 +25,8 @@ $app->get('/sitemap.xml', function ($request, $response, $args) {
 
 $app->get('/lang/[{name}]', function ($request, $response, $args) use ($settings) {
     if (!empty($args['name'])) {
-        $model = \Model\OptionsModel::model()->findByAttributes(['option_name' => 'language']);
+        setcookie("lang", $args['name'], time() + (24 * 3600), "/");
+        /*$model = \Model\OptionsModel::model()->findByAttributes(['option_name' => 'language']);
         if ($model instanceof \RedBeanPHP\OODBBean) {
             $model->option_value = $args['name'];
             $model->updated_at = date("Y-m-d H:i:s");
@@ -47,7 +48,7 @@ $app->get('/lang/[{name}]', function ($request, $response, $args) use ($settings
             $hooks->onAfterParamsSaved($omodel->getOptions());
         } catch (Exception $e) {
             //var_dump($e->getMessage()); exit;
-        }
+        }*/
     }
 
     return $response->withRedirect( '/' );
