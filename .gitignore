@@ -13,3 +13,5 @@ index.php
 *.lock
 robots.txt
 /lihat/
+site_map.xml
+*.ori

@@ -140,6 +140,9 @@ function addFilter($env, $c)
                 return substr($string, 0, $length) . ' ...';
             }
         }),
+        new \Twig_SimpleFilter('datetime', function ($string, $format = "%B %e") {
+            return strftime($format, $string);
+        }),
     ];
 
     $uri_path = $c->get('request')->getUri()->getPath();
