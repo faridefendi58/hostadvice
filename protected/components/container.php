@@ -55,7 +55,8 @@ $container['view'] = function ($c) use ($client) {
         'cache' => $settings['cache']['path'],
         'auto_reload' => true,
     ]);
-    //$view->addExtension(new Teraone\Twig\Extension\StrftimeExtension());
+
+    $view->addExtension(new Teraone\Twig\Extension\StrftimeExtension());
 
     addFilter($view->getEnvironment(), $c);
     addGlobal($view->getEnvironment(), $c, $client);
@@ -80,6 +81,8 @@ $container['module'] = function ($c) use ($user) {
         'cache' => $settings['cache']['path'],
         'auto_reload' => true,
     ]);
+
+    $view->addExtension(new Teraone\Twig\Extension\StrftimeExtension());
 
     addFilter($view->getEnvironment(), $c);
     addGlobal($view->getEnvironment(), $c, $user);
