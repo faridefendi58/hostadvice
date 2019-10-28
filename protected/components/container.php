@@ -55,6 +55,7 @@ $container['view'] = function ($c) use ($client) {
         'cache' => $settings['cache']['path'],
         'auto_reload' => true,
     ]);
+    //$view->addExtension(new Teraone\Twig\Extension\StrftimeExtension());
 
     addFilter($view->getEnvironment(), $c);
     addGlobal($view->getEnvironment(), $c, $client);
@@ -139,9 +140,6 @@ function addFilter($env, $c)
 
                 return substr($string, 0, $length) . ' ...';
             }
-        }),
-        new \Twig_SimpleFilter('datetime', function ($string, $format = "%B %e") {
-            return strftime($format, $string);
         }),
     ];
 
