@@ -83,7 +83,7 @@ class HostingRateModel extends \Model\BaseModel
         $datas = self::getData($data);
         $items = [];
         foreach ($datas as $i => $dt) {
-            $items[$dt['category_id']] = [ 'id' => $dt['id'], 'value' => (int)$dt['value'] ];
+            $items[$dt['category_id']] = [ 'id' => $dt['id'], 'title' => $dt['category_name'], 'value' => (int)$dt['value'] ];
         }
 
         return $items;
