@@ -236,4 +236,30 @@ class HostingReviewModel extends \Model\BaseModel
 
         return $rows;
     }
+
+    public function getLikeCounter($data = null)
+    {
+        $sql = 'SELECT COUNT(IF(t.rate<=5,1,NULL)) AS dislike_count, COUNT(IF(t.rate>5,1,NULL)) AS like_count
+            FROM {tablePrefix}ext_hosting_review t 
+            WHERE 1';
+
+        $params = [];
+        if (is_array($data)) {
+            if (isset($data['status'])) {
+                $sql .= " AND t.status =:status";
+                $params['status'] = $data['status'];
+            }
+            if (isset($data['hosting_company_id'])) {
+                $sql .= " AND t.hosting_company_id =:hosting_company_id";
+                $params['hosting_company_id'] = $data['hosting_company_id'];
+            }
+        }
+
+        $sql .= ' ORDER BY t.rate ASC';
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $row = \Model\R::getRow( $sql, $params );
+
+        return $row;
+    }
 }
